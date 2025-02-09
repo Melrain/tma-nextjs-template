@@ -45,8 +45,11 @@ function RootInner({ children }: PropsWithChildren) {
     initDataUser && setLocale(initDataUser.languageCode);
   }, [initDataUser]);
 
+  const manifestUrl =
+  "https://rose-just-skunk-656.mypinata.cloud/ipfs/bafkreia5ycr47j5ffcyvyyxxlkiqj4nxaraejlzhfyr2tnrevv542aqdvq";
+
   return (
-    <TonConnectUIProvider manifestUrl="/tonconnect-manifest.json">
+    <TonConnectUIProvider manifestUrl={manifestUrl}>
       <AppRoot
         appearance={isDark ? 'dark' : 'light'}
         platform={['macos', 'ios'].includes(lp.platform) ? 'ios' : 'base'}
