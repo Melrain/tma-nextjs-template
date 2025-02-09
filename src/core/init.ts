@@ -26,6 +26,7 @@ export function init(debug: boolean): void {
   initData.restore();
   void viewport.mount().then(() => {
     viewport.bindCssVars();
+    viewport.requestFullscreen();
   }).catch(e => {
     console.error('Something went wrong mounting the viewport', e);
   });
