@@ -30,7 +30,7 @@ export function init(debug: boolean): void {
     .mount()
     .then(() => {
       viewport.bindCssVars();
-      viewport.requestFullscreen();
+      // viewport.requestFullscreen();
       swipeBehavior.disableVertical();
     })
     .catch((e) => {
