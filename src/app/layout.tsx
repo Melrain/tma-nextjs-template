@@ -4,10 +4,9 @@ import { getLocale } from "next-intl/server";
 
 import { Root } from "@/components/Root/Root";
 import { I18nProvider } from "@/core/i18n/provider";
-
+import "./globals.css";
 import "@telegram-apps/telegram-ui/dist/styles.css";
 import "normalize.css/normalize.css";
-import "./_assets/globals.css";
 
 export const metadata: Metadata = {
   title: "Your Application Title Goes Here",
