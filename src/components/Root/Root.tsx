@@ -1,27 +1,29 @@
-'use client';
+"use client";
 
-import { type PropsWithChildren, useEffect } from 'react';
+import { type PropsWithChildren, useEffect } from "react";
 import {
   initData,
   miniApp,
   useLaunchParams,
   useSignal,
-} from '@telegram-apps/sdk-react';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import { AppRoot } from '@telegram-apps/telegram-ui';
+} from "@telegram-apps/sdk-react";
+import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import { AppRoot } from "@telegram-apps/telegram-ui";
 
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { ErrorPage } from '@/components/ErrorPage';
-import { useTelegramMock } from '@/hooks/useTelegramMock';
-import { useDidMount } from '@/hooks/useDidMount';
-import { useClientOnce } from '@/hooks/useClientOnce';
-import { setLocale } from '@/core/i18n/locale';
-import { init } from '@/core/init';
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorPage } from "@/components/ErrorPage";
+import { useTelegramMock } from "@/hooks/useTelegramMock";
+import { useDidMount } from "@/hooks/useDidMount";
+import { useClientOnce } from "@/hooks/useClientOnce";
+import { setLocale } from "@/core/i18n/locale";
+import { init } from "@/core/init";
 
-import './styles.css';
+import "./styles.css";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function RootInner({ children }: PropsWithChildren) {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
 
   // Mock Telegram environment in development mode if needed.
   if (isDev) {
@@ -30,7 +32,7 @@ function RootInner({ children }: PropsWithChildren) {
   }
 
   const lp = useLaunchParams();
-  const debug = isDev || lp.startParam === 'debug';
+  const debug = isDev || lp.startParam === "debug";
 
   // Initialize the library.
   useClientOnce(() => {
@@ -46,14 +48,13 @@ function RootInner({ children }: PropsWithChildren) {
   }, [initDataUser]);
 
   const manifestUrl =
-  "https://rose-just-skunk-656.mypinata.cloud/ipfs/bafkreia5ycr47j5ffcyvyyxxlkiqj4nxaraejlzhfyr2tnrevv542aqdvq";
+    "https://rose-just-skunk-656.mypinata.cloud/ipfs/bafkreia5ycr47j5ffcyvyyxxlkiqj4nxaraejlzhfyr2tnrevv542aqdvq";
 
   return (
     <TonConnectUIProvider manifestUrl={manifestUrl}>
       <AppRoot
-        appearance={isDark ? 'dark' : 'light'}
-        platform={['macos', 'ios'].includes(lp.platform) ? 'ios' : 'base'}
-      >
+        appearance={isDark ? "dark" : "light"}
+        platform={["macos", "ios"].includes(lp.platform) ? "ios" : "base"}>
         {children}
       </AppRoot>
     </TonConnectUIProvider>
@@ -68,7 +69,12 @@ export function Root(props: PropsWithChildren) {
 
   return didMount ? (
     <ErrorBoundary fallback={ErrorPage}>
-      <RootInner {...props}/>
+      <RootInner {...props} />
     </ErrorBoundary>
-  ) : <div className="root__loading">Loading</div>;
+  ) : (
+    <div className="text-white space-y-6 flex flex-col justify-center items-center h-screen">
+      <div>Loading...</div>
+      <Link href={"/"}>home</Link>
+    </div>
+  );
 }

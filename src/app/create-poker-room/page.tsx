@@ -3,7 +3,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div>
+    <div className="flex justify-center items-center h-screen max-w-1/2 w-full">
       <CreatePokerRoom />
     </div>
   );
