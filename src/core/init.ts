@@ -13,6 +13,13 @@ import {
  * Initializes the application and configures its dependencies.
  */
 export function init(debug: boolean): void {
+  // // unmount everything
+  // backButton.unmount();
+  // miniApp.unmount();
+  // themeParams.unmount();
+  // swipeBehavior.unmount();
+  // viewport.unmount();
+
   // Set @telegram-apps/sdk-react debug mode.
   $debug.set(debug);
 
@@ -29,7 +36,7 @@ export function init(debug: boolean): void {
   void viewport
     .mount()
     .then(() => {
-      viewport.bindCssVars();
+      // viewport.bindCssVars();
       // viewport.requestFullscreen();
       swipeBehavior.disableVertical();
     })
@@ -38,8 +45,8 @@ export function init(debug: boolean): void {
     });
 
   // Define components-related CSS variables.
-  miniApp.bindCssVars();
-  themeParams.bindCssVars();
+  // miniApp.bindCssVars();
+  // themeParams.bindCssVars();
 
   // Add Eruda if needed.
   debug &&

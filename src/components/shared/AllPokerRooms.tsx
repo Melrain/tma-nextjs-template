@@ -5,6 +5,7 @@ import { useLaunchParams } from "@telegram-apps/sdk-react";
 import { useTonAddress, useTonWallet } from "@tonconnect/ui-react";
 import { initializeSocket, getSocket } from "../../lib/socketService"; // 导入封装的 socketService
 import { SocketCode } from "@/types/SocketCode";
+import Link from "next/link";
 
 const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
@@ -78,7 +79,8 @@ const AllPokerRooms = () => {
       <h1>{isConnected ? "Connected" : "Disconnected"}</h1>
       <div className="flex flex-col space-y-2">
         {allPokerRooms?.map((room: any) => (
-          <div
+          <Link
+            href={`/poker-room/${room._id}`}
             key={room._id}
             className="flex flex-col justify-center items-start py-2">
             <span>{room.roomName}</span>
@@ -88,28 +90,7 @@ const AllPokerRooms = () => {
             <span>
               {room.playerList.length}/{room.maxSeats}
             </span>
-            <span>{room.roomName}</span>
-            <span>
-              {room.minBuyIn}/{room.maxBuyIn}
-            </span>
-            <span>
-              {room.playerList.length}/{room.maxSeats}
-            </span>
-            <span>{room.roomName}</span>
-            <span>
-              {room.minBuyIn}/{room.maxBuyIn}
-            </span>
-            <span>
-              {room.playerList.length}/{room.maxSeats}
-            </span>
-            <span>{room.roomName}</span>
-            <span>
-              {room.minBuyIn}/{room.maxBuyIn}
-            </span>
-            <span>
-              {room.playerList.length}/{room.maxSeats}
-            </span>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
