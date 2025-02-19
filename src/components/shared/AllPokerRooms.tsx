@@ -61,9 +61,15 @@ const AllPokerRooms = () => {
       setAllPokerRooms(rooms[0].data);
     });
 
+    socket.on("pokerroomsChanged", () => {
+      socket.emit(SocketCode.GET_ALL_ROOMS);
+    });
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off(SocketCode.GET_ALL_ROOMS);
+      socket.off("pokerroomsChanged");
     };
   }, [wallet, initData, userFriendlyAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
 
@@ -72,8 +78,37 @@ const AllPokerRooms = () => {
       <h1>{isConnected ? "Connected" : "Disconnected"}</h1>
       <div className="flex flex-col space-y-2">
         {allPokerRooms?.map((room: any) => (
-          <div key={room._id}>
+          <div
+            key={room._id}
+            className="flex flex-col justify-center items-start py-2">
             <span>{room.roomName}</span>
+            <span>
+              {room.minBuyIn}/{room.maxBuyIn}
+            </span>
+            <span>
+              {room.playerList.length}/{room.maxSeats}
+            </span>
+            <span>{room.roomName}</span>
+            <span>
+              {room.minBuyIn}/{room.maxBuyIn}
+            </span>
+            <span>
+              {room.playerList.length}/{room.maxSeats}
+            </span>
+            <span>{room.roomName}</span>
+            <span>
+              {room.minBuyIn}/{room.maxBuyIn}
+            </span>
+            <span>
+              {room.playerList.length}/{room.maxSeats}
+            </span>
+            <span>{room.roomName}</span>
+            <span>
+              {room.minBuyIn}/{room.maxBuyIn}
+            </span>
+            <span>
+              {room.playerList.length}/{room.maxSeats}
+            </span>
           </div>
         ))}
       </div>
