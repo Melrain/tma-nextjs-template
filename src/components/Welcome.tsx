@@ -1,15 +1,17 @@
 "use client";
 
 import { TonConnectButton, useTonWallet } from "@tonconnect/ui-react";
-import React from "react";
-import Link from "next/link";
+import React, { useState } from "react";
 import { DicesIcon } from "lucide-react";
 import { GiPokerHand } from "react-icons/gi";
 import ConnectWallet from "./shared/ConnectWallet";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 
 const Welcome = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const wallet = useTonWallet();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col justify-center space-y-6 items-center h-screen">
@@ -19,12 +21,14 @@ const Welcome = () => {
       </div>
       <div className="flex flex-col space-y-6 justify-center items-center">
         <Button
+          onClick={() => router.push("/dice")}
           disabled={!wallet}
           className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
           <DicesIcon />
           <span>Go to Dice</span>
         </Button>
         <Button
+          onClick={() => router.push("/poker-rooms")}
           disabled={!wallet}
           className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
           <GiPokerHand />
