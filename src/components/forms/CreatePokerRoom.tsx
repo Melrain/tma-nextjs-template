@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,6 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   blindSize: z.coerce.number().positive(),
@@ -28,6 +30,9 @@ const formSchema = z.object({
 });
 
 const CreatePokerRoom = () => {
+  const [isCreating, setIsCreating] = useState(false);
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,10 +41,38 @@ const CreatePokerRoom = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsCreating(true);
+      const createRoomDto = {
+        roomName: "",
+        players: [],
+        maxPlayers: values.maxPlayers,
+        deck: [],
+        communityCards: [],
+        pot: 0,
+        bigBlind: values.blindSize,
+        smallBlind: values.blindSize / 2,
+        currentTurnPlayer: "",
+        gameStatus: "",
+        round: 0,
+      };
+
+      const response = await axios.post(
+        "http://localhost:8080/api/poker-room",
+        createRoomDto
+      );
+      if (response.status !== 201) {
+        setIsCreating(false);
+        return console.error("create room failed");
+      }
+      setIsCreating(false);
+      return router.push("/");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsCreating(false);
+    }
   }
   return (
     <Form {...form}>
@@ -53,7 +86,9 @@ const CreatePokerRoom = () => {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Select>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={String(field.value)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="BlindSize" />
                   </SelectTrigger>
@@ -80,7 +115,9 @@ const CreatePokerRoom = () => {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Select>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={String(field.value)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="players" />
                   </SelectTrigger>
@@ -100,7 +137,11 @@ const CreatePokerRoom = () => {
             </FormItem>
           )}
         />
-        <Button type="submit">Create Room</Button>
+        <Button
+          type="submit"
+          disabled={isCreating}>
+          {isCreating ? "Creating..." : "Create Room"}
+        </Button>
       </form>
     </Form>
   );

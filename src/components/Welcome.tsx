@@ -21,18 +21,18 @@ const Welcome = () => {
       </div>
       <div className="flex flex-col space-y-6 justify-center items-center">
         <Button
-          onClick={() => router.push("/dice")}
-          disabled={!wallet}
-          className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
-          <DicesIcon />
-          <span>Go to Dice</span>
-        </Button>
-        <Button
           onClick={() => router.push("/poker-rooms")}
           disabled={!wallet}
           className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
           <GiPokerHand />
           <span>Go to Poker</span>
+        </Button>
+        <Button
+          onClick={() => router.push("/create-poker-room")}
+          disabled={!wallet}
+          className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
+          <GiPokerHand />
+          <span>创建房间</span>
         </Button>
       </div>
     </div>
