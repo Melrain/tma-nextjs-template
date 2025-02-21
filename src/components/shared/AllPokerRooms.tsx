@@ -78,20 +78,29 @@ const AllPokerRooms = () => {
     <div className="flex flex-col space-y-6">
       <h1>{isConnected ? "Connected" : "Disconnected"}</h1>
       <div className="flex flex-col space-y-2">
-        {allPokerRooms?.map((room: any) => (
-          <Link
-            href={`/poker-room/${room._id}`}
-            key={room._id}
-            className="flex flex-col justify-center items-start py-2">
-            <span>{room.roomName}</span>
-            <span>
-              {room.minBuyIn}/{room.maxBuyIn}
-            </span>
-            <span>
-              {room.playerList.length}/{room.maxSeats}
-            </span>
-          </Link>
-        ))}
+        {allPokerRooms?.map(
+          (room: {
+            _id: string;
+            roomName: string;
+            minBuyIn: number;
+            maxBuyIn: number;
+            playerList: [];
+            maxPlayers: number;
+          }) => (
+            <Link
+              href={`/poker-room/${room._id}`}
+              key={room._id}
+              className="flex flex-col justify-center items-start py-2">
+              <span>{room.roomName}</span>
+              <span>
+                {room.minBuyIn}/{room.maxBuyIn}
+              </span>
+              <span>
+                {room.playerList.length}/{room.maxPlayers}
+              </span>
+            </Link>
+          )
+        )}
       </div>
     </div>
   );
