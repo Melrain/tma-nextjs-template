@@ -23,6 +23,8 @@ import {
 } from "../ui/select";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { useTonAddress } from "@tonconnect/ui-react";
 
 const formSchema = z.object({
   blindSize: z.coerce.number().positive(),
@@ -32,6 +34,9 @@ const formSchema = z.object({
 const CreatePokerRoom = () => {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
+  const { initData } = retrieveLaunchParams();
+
+  const address = useTonAddress();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +50,8 @@ const CreatePokerRoom = () => {
     try {
       setIsCreating(true);
       const createRoomDto = {
-        roomName: "",
+        roomName: `${initData?.user?.username}'s room`,
+        host: address,
         players: [],
         maxPlayers: values.maxPlayers,
         deck: [],
@@ -54,7 +60,7 @@ const CreatePokerRoom = () => {
         bigBlind: values.blindSize,
         smallBlind: values.blindSize / 2,
         currentTurnPlayer: "",
-        gameStatus: "",
+        gameStatus: "waiting",
         round: 0,
       };
 
@@ -67,7 +73,6 @@ const CreatePokerRoom = () => {
         return console.error("create room failed");
       }
       setIsCreating(false);
-      return router.push("/");
     } catch (error) {
       console.error(error);
     } finally {

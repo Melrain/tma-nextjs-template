@@ -6,6 +6,7 @@ import { useTonAddress, useTonWallet } from "@tonconnect/ui-react";
 import { initializeSocket, getSocket } from "../../lib/socketService"; // 导入封装的 socketService
 import { SocketCode } from "@/types/SocketCode";
 import Link from "next/link";
+import ConnectWallet from "./ConnectWallet";
 
 const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
@@ -76,6 +77,7 @@ const AllPokerRooms = () => {
 
   return (
     <div className="flex flex-col space-y-6">
+      <ConnectWallet />
       <h1>{isConnected ? "Connected" : "Disconnected"}</h1>
       <div className="flex flex-col space-y-2">
         {allPokerRooms?.map(
@@ -84,11 +86,11 @@ const AllPokerRooms = () => {
             roomName: string;
             minBuyIn: number;
             maxBuyIn: number;
-            playerList: [];
+            players: [];
             maxPlayers: number;
           }) => (
             <Link
-              href={`/poker-room/${room._id}`}
+              href={`/poker-rooms/${room._id}`}
               key={room._id}
               className="flex flex-col justify-center items-start py-2">
               <span>{room.roomName}</span>
@@ -96,7 +98,7 @@ const AllPokerRooms = () => {
                 {room.minBuyIn}/{room.maxBuyIn}
               </span>
               <span>
-                {room.playerList.length}/{room.maxPlayers}
+                {room.players.length}/{room.maxPlayers}
               </span>
             </Link>
           )
