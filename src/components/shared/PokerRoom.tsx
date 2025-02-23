@@ -54,6 +54,7 @@ const PokerRoom = ({ id }: { id: string }) => {
 
     function onConnect() {
       setIsConnected(true);
+      socket.emit("join-room", id);
     }
 
     function onDisconnect() {
@@ -62,10 +63,14 @@ const PokerRoom = ({ id }: { id: string }) => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
+    socket.on(`poker-room-${id}`, (data: IRoomData) => {
+      console.log(data);
+    });
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
+      socket.off(`poker-room-${id}`);
     };
   }, [id, initData?.user?.username, walletAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
 
@@ -78,19 +83,7 @@ const PokerRoom = ({ id }: { id: string }) => {
       <h1>{isConnected ? "connected" : "disconnected"}</h1>
       <div className="flex relative justify-center min-h-screen items-center bg-mycolor-100 text-white">
         {/* player card */}
-        <div className="flex absolute z-50 flex-col justify-center items-center top-0 left-0 p-4 space-y-2">
-          {/* waitingPlayer list */}
-          <div className="flex flex-row space-x-1 justify-center items-center">
-            {roomData.players.map((player, index) => (
-              <div
-                className="flex items-center flex-row justify-center"
-                key={player.playerId}>
-                <p>{index}:</p>
-                <p> {player.playerId}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <div className="flex absolute z-50 flex-col justify-center items-center top-0 left-0 p-4 space-y-2"></div>
         <div className="border-[15px] shadow-lg shadow-slate-200 max-lg:border-[20px] border-black bg-mycolor-700 justify-between flex relative flex-col lg:rounded-full max-lg:h-screen max-lg:w-full lg:w-full lg:max-w-[1200px] lg:h-screen lg:max-h-[600px]">
           <div className="flex flex-col justify-center items-center">
             <p>4</p>
@@ -117,7 +110,7 @@ const PokerRoom = ({ id }: { id: string }) => {
             </div>
           </div>
 
-          <div className="flex justify-center items-center flex-col">
+          {/* <div className="flex justify-center items-center flex-col">
             <p>1</p>
             {roomData?.players.some(
               (player) => player.tonWalletAddress === walletAddress
@@ -128,14 +121,14 @@ const PokerRoom = ({ id }: { id: string }) => {
                   <div>Player 1</div>
                 </div>
               )}
-          </div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          </div> */}
+          {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex flex-row gap-2 items-center justify-center">
               {roomData?.communityCards.map((card) => (
                 <div key={card}>cards</div>
               ))}
             </div>
-          </div>
+          </div> */}
           <h1 className="absolute text-3xl opacity-20 top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             在线德州扑克 :{" "}
             {roomData?.gameStatus !== "waiting"

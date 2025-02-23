@@ -8,6 +8,14 @@ import { SocketCode } from "@/types/SocketCode";
 import Link from "next/link";
 import ConnectWallet from "./ConnectWallet";
 
+import axios from "axios";
+import { Button } from "../ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -18,6 +26,20 @@ const AllPokerRooms = () => {
   const { initData } = useLaunchParams();
 
   const userFriendlyAddress = useTonAddress();
+
+  const joinRoom = async (roomid: string) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/poker-room/join",
+        {
+          roomid,
+          tonwallet: userFriendlyAddress,
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     if (!wallet) {
@@ -63,7 +85,8 @@ const AllPokerRooms = () => {
       setAllPokerRooms(rooms[0].data);
     });
 
-    socket.on("pokerroomsChanged", () => {
+    socket.on(SocketCode.POKER_ROOMS_CHANGED, () => {
+      console.log("pokerroomsChanged");
       socket.emit(SocketCode.GET_ALL_ROOMS);
     });
 
@@ -89,18 +112,27 @@ const AllPokerRooms = () => {
             players: [];
             maxPlayers: number;
           }) => (
-            <Link
-              href={`/poker-rooms/${room._id}`}
+            <div
               key={room._id}
-              className="flex flex-col justify-center items-start py-2">
-              <span>{room.roomName}</span>
-              <span>
-                {room.minBuyIn}/{room.maxBuyIn}
-              </span>
-              <span>
-                {room.players.length}/{room.maxPlayers}
-              </span>
-            </Link>
+              className="flex flex-row">
+              <Link
+                href={`/poker-rooms/${room._id}`}
+                className="flex flex-col justify-center items-start py-2">
+                <span>{room.roomName}</span>
+                <span>
+                  {room.minBuyIn}/{room.maxBuyIn}
+                </span>
+                <span>
+                  {room.players.length}/{room.maxPlayers}
+                </span>
+              </Link>
+              <Popover>
+                <PopoverTrigger>进入</PopoverTrigger>
+                <PopoverContent className="bg-transparent border-slate-500 flex flex-col ">
+                  <div></div>
+                </PopoverContent>
+              </Popover>
+            </div>
           )
         )}
       </div>
