@@ -83,10 +83,13 @@ const AllPokerRooms = () => {
     socket.on("disconnect", onDisconnect);
 
     // 监听获取所有房间信息的响应
-    socket.on(SocketCode.GET_ALL_ROOMS, (rooms: any) => {
-      console.log("here rooms:", rooms[0].data);
-      setAllPokerRooms(rooms[0].data);
-    });
+    socket.on(
+      SocketCode.GET_ALL_ROOMS,
+      (response: { data: {}[]; message: string; status: number }) => {
+        console.log("here rooms:", response);
+        setAllPokerRooms(response.data);
+      }
+    );
 
     socket.on(SocketCode.POKER_ROOMS_CHANGED, () => {
       console.log("pokerroomsChanged");
