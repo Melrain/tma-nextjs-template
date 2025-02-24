@@ -4,7 +4,7 @@ import React from "react";
 
 const page = async () => {
   return (
-    <div>
+    <div className="h-screen flex justify-center items-center">
       <AllPokerRooms />
     </div>
   );
