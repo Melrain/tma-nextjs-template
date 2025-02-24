@@ -1,9 +1,9 @@
 "use client";
-import { DefaultEventsMap } from "@socket.io/component-emitter";
+
 // socketService.js
 import { io, Socket } from "socket.io-client";
 
-let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+let socket: Socket;
 
 export const initializeSocket = ({
   tonwallet,
