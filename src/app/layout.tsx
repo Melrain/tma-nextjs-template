@@ -18,7 +18,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <html lang={locale}>
-      <body>
+      <body className="overflow-hidden">
         <I18nProvider>
           <Root>{children}</Root>
         </I18nProvider>
