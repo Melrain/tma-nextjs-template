@@ -7,6 +7,7 @@ import { I18nProvider } from "@/core/i18n/provider";
 import "./globals.css";
 import "@telegram-apps/telegram-ui/dist/styles.css";
 import "normalize.css/normalize.css";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Your Application Title Goes Here",
@@ -20,6 +21,11 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     <html lang={locale}>
       <body>
         <I18nProvider>
+          <Link
+            href={"/"}
+            className="text-white">
+            back
+          </Link>
           <Root>{children}</Root>
         </I18nProvider>
       </body>

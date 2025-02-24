@@ -28,8 +28,9 @@ module.exports = {
           foreground: "hsl(var(--popover-foreground))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          100: "#0061FF0A",
+          200: "#0061FF1A",
+          300: "#0061FF",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -57,6 +58,18 @@ module.exports = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
+        // dark bg from 100-900
+        black: {
+          DEFAULT: "#000000",
+          100: "#8C8E98",
+          200: "#666876",
+          300: "#191D31",
+        },
+        accent: {
+          100: "#FBFBFD",
+        },
+
+        danger: "#F75555",
       },
     },
   },

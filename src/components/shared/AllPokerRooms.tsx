@@ -7,6 +7,7 @@ import { initializeSocket, getSocket } from "../../lib/socketService"; // 导入
 import { SocketCode } from "@/types/SocketCode";
 import Link from "next/link";
 import ConnectWallet from "./ConnectWallet";
+import { Slider } from "@/components/ui/slider";
 
 import axios from "axios";
 import { Button } from "../ui/button";
@@ -20,6 +21,7 @@ const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
+  const [buyInAmount, setBuyInAmount] = useState(0);
 
   const wallet = useTonWallet();
 
@@ -34,6 +36,7 @@ const AllPokerRooms = () => {
         {
           roomid,
           tonwallet: userFriendlyAddress,
+          buyInAmount,
         }
       );
     } catch (error) {
@@ -107,29 +110,48 @@ const AllPokerRooms = () => {
           (room: {
             _id: string;
             roomName: string;
-            minBuyIn: number;
-            maxBuyIn: number;
+            bigBlind: number;
             players: [];
             maxPlayers: number;
           }) => (
             <div
               key={room._id}
               className="flex flex-row">
-              <Link
-                href={`/poker-rooms/${room._id}`}
-                className="flex flex-col justify-center items-start py-2">
+              <div className="flex flex-row space-x-4 justify-center items-start">
                 <span>{room.roomName}</span>
                 <span>
-                  {room.minBuyIn}/{room.maxBuyIn}
+                  {room.bigBlind * 20}/{room.bigBlind * 100}
                 </span>
                 <span>
                   {room.players.length}/{room.maxPlayers}
                 </span>
-              </Link>
+              </div>
               <Popover>
-                <PopoverTrigger>进入</PopoverTrigger>
-                <PopoverContent className="bg-transparent border-slate-500 flex flex-col ">
-                  <div></div>
+                <PopoverTrigger
+                  onClick={() => {
+                    setBuyInAmount(room.bigBlind * 20);
+                  }}>
+                  进入
+                </PopoverTrigger>
+                <PopoverContent className="border-1 bg-black-300 border-slate-500 flex flex-col ">
+                  <div className="flex flex-row flex-1">
+                    <span className="text-white">{room.bigBlind * 20}</span>
+                    <Slider
+                      onValueChange={(value) => {
+                        setBuyInAmount(value[0]);
+                      }}
+                      className="flex-1 bg-black"
+                      defaultValue={[room.bigBlind * 20]}
+                      min={room.bigBlind * 20}
+                      max={room.bigBlind * 100}
+                      step={10}
+                    />
+                    <span className="text-white">{room.bigBlind * 100}</span>
+                  </div>
+                  <span className="text-white text-center flex-1">
+                    {buyInAmount}
+                  </span>
+                  <Button variant={"outline"}>Confirm</Button>
                 </PopoverContent>
               </Popover>
             </div>
