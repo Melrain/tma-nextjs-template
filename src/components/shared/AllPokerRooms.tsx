@@ -11,17 +11,11 @@ import { Slider } from "@/components/ui/slider";
 
 import axios from "axios";
 import { Button } from "../ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
-  const [buyInAmount, setBuyInAmount] = useState(0);
 
   const wallet = useTonWallet();
 
@@ -29,16 +23,16 @@ const AllPokerRooms = () => {
 
   const userFriendlyAddress = useTonAddress();
 
-  const joinRoom = async (roomid: string) => {
+  const joinRoom = async (roomId: string, tonWalletAddress: string) => {
     try {
       const response = await axios.post(
         "http://localhost:8080/api/poker-room/join",
         {
-          roomid,
-          tonwallet: userFriendlyAddress,
-          buyInAmount,
+          roomId,
+          tonWalletAddress,
         }
       );
+      console.log("response:", response.data);
     } catch (error) {
       console.error(error);
     }
@@ -86,13 +80,11 @@ const AllPokerRooms = () => {
     socket.on(
       SocketCode.GET_ALL_ROOMS,
       (response: { data: []; message: string; status: number }) => {
-        console.log("here rooms:", response);
         setAllPokerRooms(response.data);
       }
     );
 
     socket.on(SocketCode.POKER_ROOMS_CHANGED, () => {
-      console.log("pokerroomsChanged");
       socket.emit(SocketCode.GET_ALL_ROOMS);
     });
 
@@ -120,7 +112,7 @@ const AllPokerRooms = () => {
             <div
               key={room._id}
               className="flex flex-row">
-              <div className="flex flex-row space-x-4 justify-center items-start">
+              <div className="flex flex-row space-x-4 justify-center items-center">
                 <span>{room.roomName}</span>
                 <span>
                   {room.bigBlind * 20}/{room.bigBlind * 100}
@@ -129,7 +121,7 @@ const AllPokerRooms = () => {
                   {room.players.length}/{room.maxPlayers}
                 </span>
               </div>
-              <Popover>
+              {/* <Popover>
                 <PopoverTrigger
                   onClick={() => {
                     setBuyInAmount(room.bigBlind * 20);
@@ -154,9 +146,19 @@ const AllPokerRooms = () => {
                   <span className="text-white text-center flex-1">
                     {buyInAmount}
                   </span>
-                  <Button variant={"outline"}>Confirm</Button>
+                  <div className="flex flex-1 flex-row space-x-2">
+                    <Button variant={"outline"}>Confirm</Button>
+                  </div>
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
+              <Button
+                onClick={() => {
+                  joinRoom(room._id, userFriendlyAddress);
+                }}
+                variant="secondary"
+                className="ml-2">
+                Enter
+              </Button>
             </div>
           )
         )}

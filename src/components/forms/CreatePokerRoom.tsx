@@ -25,6 +25,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
 import { useTonAddress } from "@tonconnect/ui-react";
+import { GameStatus } from "@/types/GameStatus";
 
 const formSchema = z.object({
   blindSize: z.coerce.number().positive(),
@@ -51,17 +52,27 @@ const CreatePokerRoom = () => {
       setIsCreating(true);
       const createRoomDto = {
         roomName: `${initData?.user?.username}'s room`,
-        host: address,
         players: [],
-        maxPlayers: values.maxPlayers,
-        deck: [],
+        observers: [],
+        dealerSeat: null,
+        nextSeatToAct: null,
+        currentMinBet: values.blindSize,
+        playersActed: [],
+        gameStatus: GameStatus.WAITING,
+        host: address,
         communityCards: [],
-        pot: 0,
+        potSize: 0,
         bigBlind: values.blindSize,
         smallBlind: values.blindSize / 2,
-        currentTurnPlayer: "",
-        gameStatus: "waiting",
-        round: 0,
+        maxPlayers: values.maxPlayers,
+        rounds: 0,
+        actionTimer: 0,
+        roundTimer: 0,
+        isPrivate: false,
+        password: null,
+        handHistory: [],
+        disconnectTimeout: 0,
+        chatLogs: [],
       };
 
       const response = await axios.post(
@@ -89,7 +100,7 @@ const CreatePokerRoom = () => {
           name="blindSize"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Blind Size</FormLabel>
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
@@ -118,7 +129,7 @@ const CreatePokerRoom = () => {
           name="maxPlayers"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Max Players</FormLabel>
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
