@@ -2,16 +2,14 @@
 
 import { TonConnectButton, useTonAddress } from "@tonconnect/ui-react";
 import React, { useEffect } from "react";
-import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import axios from "axios";
-import { useUserStore } from "@/store";
 
 const ConnectWallet = () => {
   const [userBalance, setUserBalance] = React.useState(0);
-  const { initData } = retrieveLaunchParams();
   const walletAddress = useTonAddress();
-
-  const { username, setUsername } = useUserStore();
+  const _initData = parseInitData(initData.raw());
+  // console.log("initData:", parseInitData(initData.raw()));
 
   useEffect(() => {
     const addUserToDb = async () => {
@@ -21,15 +19,13 @@ const ConnectWallet = () => {
           const response = await axios.post(
             "http://localhost:8080/api/user/login",
             {
-              username: initData?.user?.username,
+              username: _initData.user?.firstName || "user",
               walletAddress: walletAddress,
               avatar:
-                initData?.user?.photoUrl ||
-                "https://rose-just-skunk-656.mypinata.cloud/ipfs/bafkreifvoiet4ojth3p2vemdz3dglw2mfuyivkps6pgi4axpg2g2tjl3wi",
+                _initData.user?.photoUrl || "https://www.gravatar.com/avatar/",
             }
           );
 
-          setUsername(response.data.username);
           setUserBalance(response.data.balance);
           console.log("response:", response.data);
         }
@@ -38,17 +34,12 @@ const ConnectWallet = () => {
       }
     };
     addUserToDb();
-  }, [
-    initData?.user?.photoUrl,
-    initData?.user?.username,
-    setUsername,
-    walletAddress,
-  ]);
+  }, [_initData.user?.firstName, _initData.user?.photoUrl, walletAddress]);
 
   return (
     <div className="flex bg-black-300 rounded-lg p-4 flex-col text-white space-y-6 justify-center items-center">
       <p>user card:</p>
-      <p>name:{username}</p>
+      <p>name:{_initData.user?.firstName || "just user"}</p>
       <p>balance:{userBalance}</p>
       <div>
         <TonConnectButton />

@@ -16,15 +16,16 @@ export const initializeSocket = ({
   roomid: string;
   url: string;
 }) => {
-  if (!socket) {
-    socket = io(url, {
-      extraHeaders: {
-        tonwallet,
-        username,
-        roomid,
-      },
-    });
+  if (socket) {
+    socket.disconnect();
   }
+  socket = io(url, {
+    extraHeaders: {
+      tonwallet,
+      username,
+      roomid,
+    },
+  });
   return socket;
 };
 

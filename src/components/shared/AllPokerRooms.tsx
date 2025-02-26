@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 
 import axios from "axios";
 import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 
 const AllPokerRooms = () => {
   const [allPokerRooms, setAllPokerRooms] = useState([]);
@@ -18,21 +19,22 @@ const AllPokerRooms = () => {
   const [transport, setTransport] = useState("N/A");
 
   const wallet = useTonWallet();
-
   const { initData } = useLaunchParams();
-
   const userFriendlyAddress = useTonAddress();
+
+  const router = useRouter();
 
   const joinRoom = async (roomId: string, tonWalletAddress: string) => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/poker-room/join",
-        {
-          roomId,
-          tonWalletAddress,
-        }
-      );
-      console.log("response:", response.data);
+      // const response = await axios.post(
+      //   "http://localhost:8080/api/poker-room/join",
+      //   {
+      //     roomId,
+      //     tonWalletAddress,
+      //   }
+      // );
+      // console.log("response:", response.data);
+      router.push(`/poker-rooms/${roomId}`);
     } catch (error) {
       console.error(error);
     }
@@ -80,6 +82,7 @@ const AllPokerRooms = () => {
     socket.on(
       SocketCode.GET_ALL_ROOMS,
       (response: { data: []; message: string; status: number }) => {
+        console.log(response);
         setAllPokerRooms(response.data);
       }
     );
@@ -92,7 +95,6 @@ const AllPokerRooms = () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off(SocketCode.GET_ALL_ROOMS);
-      socket.off("pokerroomsChanged");
     };
   }, [wallet, initData, userFriendlyAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
 
