@@ -23,7 +23,11 @@ import {
 } from "../ui/select";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import {
+  initData,
+  parseInitData,
+  retrieveLaunchParams,
+} from "@telegram-apps/sdk-react";
 import { useTonAddress } from "@tonconnect/ui-react";
 import { GameStatus } from "@/types/GameStatus";
 
@@ -35,7 +39,7 @@ const formSchema = z.object({
 const CreatePokerRoom = () => {
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
-  const { initData } = retrieveLaunchParams();
+  const _initData = parseInitData(initData.raw());
 
   const address = useTonAddress();
 
@@ -51,7 +55,7 @@ const CreatePokerRoom = () => {
     try {
       setIsCreating(true);
       const createRoomDto = {
-        roomName: `${initData?.user?.username}'s room`,
+        roomName: `${_initData.user?.firstName}'s room`,
         players: [],
         observers: [],
         dealerSeat: null,

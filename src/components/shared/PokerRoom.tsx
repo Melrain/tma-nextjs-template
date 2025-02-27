@@ -1,10 +1,11 @@
 "use client";
 import { initializeSocket } from "@/lib/socketService";
 import React, { useState, useEffect } from "react";
-import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
+import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useTonAddress } from "@tonconnect/ui-react";
-import { Button } from "../ui/button";
+
 import { SocketCode } from "@/types/SocketCode";
+import RoomUI from "./RoomUI";
 
 interface IPlayer {
   playerId: string;
@@ -34,9 +35,12 @@ interface IRoomData {
 const PokerRoom = ({ id }: { id: string }) => {
   const [playerList, setPlayerList] = useState<IPlayer[]>([]);
   const [roomData, setRoomData] = useState<IRoomData>();
+  const [roomMessage, setRoomMessage] = useState<string>("");
   const [isConnected, setIsConnected] = useState(false);
+
   const walletAddress = useTonAddress();
-  const { initData } = retrieveLaunchParams();
+
+  const _initData = parseInitData(initData.raw());
 
   useEffect(() => {
     // const userFriendlyAddress = toUserFriendlyAddress(wallet.account.address);
@@ -45,7 +49,7 @@ const PokerRoom = ({ id }: { id: string }) => {
     const socket = initializeSocket({
       url: "http://localhost:8080/",
       tonwallet: walletAddress,
-      username: initData?.user?.username || "",
+      username: _initData.user?.firstName || "user",
       roomid: id,
     });
 
@@ -64,18 +68,37 @@ const PokerRoom = ({ id }: { id: string }) => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on(SocketCode.GET_ROOM + id, (data: any) => {
+    socket.on(SocketCode.GET_ROOM + id, (data) => {
       console.log(data);
+    });
+
+    socket.on(SocketCode.ROOM_MESSAGE + id, (data) => {
+      console.log(data);
+      setRoomMessage(data.message);
     });
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off(SocketCode.GET_ROOM + id);
+      socket.off(SocketCode.ROOM_MESSAGE + id);
     };
-  }, [id, initData?.user?.username, walletAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
+  }, [_initData.user?.firstName, id, walletAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
 
-  return <div>room</div>;
+  const players = [
+    { id: 1, name: "Alice", chips: 1000, seatNumber: 1 },
+    { id: 2, name: "Bob", chips: 800, seatNumber: 2 },
+    { id: 3, name: "Charlie", chips: 1200, seatNumber: 3 },
+    { id: 4, name: "Diana", chips: 500, seatNumber: 4 },
+    { id: 5, name: "Eve", chips: 700, seatNumber: 5 },
+    { id: 6, name: "Frank", chips: 600, seatNumber: 6 },
+  ];
+
+  return (
+    <div>
+      <RoomUI players={players} />
+    </div>
+  );
 };
 
 export default PokerRoom;

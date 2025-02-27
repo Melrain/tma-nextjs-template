@@ -16,9 +16,9 @@ export const initializeSocket = ({
   roomid: string;
   url: string;
 }) => {
-  if (socket) {
-    socket.disconnect();
-  }
+  // if (socket) {
+  //   socket.disconnect();
+  // }
   socket = io(url, {
     extraHeaders: {
       tonwallet,
