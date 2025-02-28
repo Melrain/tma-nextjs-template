@@ -37,6 +37,7 @@ const PokerRoom = ({ id }: { id: string }) => {
   const [roomData, setRoomData] = useState<IRoomData>();
   const [roomMessage, setRoomMessage] = useState<string>("");
   const [isConnected, setIsConnected] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const walletAddress = useTonAddress();
 
@@ -96,7 +97,10 @@ const PokerRoom = ({ id }: { id: string }) => {
 
   return (
     <div>
-      <RoomUI players={players} />
+      <RoomUI
+        players={players}
+        communicateCards={["SA", "SA", "SA", "SA", "SA"]}
+      />
     </div>
   );
 };

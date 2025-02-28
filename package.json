@@ -2,6 +2,11 @@
   "name": "nextjs-template",
   "version": "0.1.0",
   "private": true,
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ]
+  },
   "scripts": {
     "dev": "next dev",
     "dev:https": "next dev --experimental-https",
@@ -55,6 +60,8 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
     "postcss": "^8.5.2",
+    "prettier": "^3.5.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.5.2"
   }
