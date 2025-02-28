@@ -36,6 +36,7 @@
     "framer-motion": "^12.4.7",
     "ll": "^1.2.0",
     "lucide-react": "^0.475.0",
+    "mongoose": "^8.11.0",
     "next": "14.2.4",
     "next-intl": "^3.17.6",
     "normalize.css": "^8.0.1",
