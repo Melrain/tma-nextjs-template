@@ -23,10 +23,10 @@ const ConnectWallet = () => {
               walletAddress: walletAddress,
               avatar:
                 _initData.user?.photoUrl || "https://www.gravatar.com/avatar/",
-            }
+            },
           );
 
-          setUserBalance(response.data.balance);
+          setUserBalance(response.data.data.balance);
           console.log("response:", response.data);
         }
       } catch (error) {
@@ -37,7 +37,7 @@ const ConnectWallet = () => {
   }, [_initData.user?.firstName, _initData.user?.photoUrl, walletAddress]);
 
   return (
-    <div className="flex bg-black-300 rounded-lg p-4 flex-col text-white space-y-6 justify-center items-center">
+    <div className="flex flex-col items-center justify-center space-y-6 rounded-lg bg-black-300 p-4 text-white">
       <p>user card:</p>
       <p>name:{_initData.user?.firstName || "just user"}</p>
       <p>balance:{userBalance}</p>

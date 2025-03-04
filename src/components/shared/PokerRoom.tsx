@@ -6,20 +6,11 @@ import { useTonAddress } from "@tonconnect/ui-react";
 
 import { SocketCode } from "@/types/SocketCode";
 import RoomUI from "./RoomUI";
+import { players } from "@/lib/FakeData";
 
-interface IPlayer {
-  playerId: string;
-  playerName: string;
-  tonWalletAddress: string;
-  avatar: string;
-  chipsInGame: number;
-  currentBet: number;
-  hand: string[];
-  action: string;
-}
 interface IRoomData {
   roomName: string;
-  players: IPlayer[];
+  players: [];
   host: string;
   deck: string[];
   communityCards: string[];
@@ -33,7 +24,7 @@ interface IRoomData {
 }
 
 const PokerRoom = ({ id }: { id: string }) => {
-  const [playerList, setPlayerList] = useState<IPlayer[]>([]);
+  const [playerList, setPlayerList] = useState<[]>([]);
   const [roomData, setRoomData] = useState<IRoomData>();
   const [roomMessage, setRoomMessage] = useState<string>("");
   const [isConnected, setIsConnected] = useState(false);
@@ -60,7 +51,7 @@ const PokerRoom = ({ id }: { id: string }) => {
 
     function onConnect() {
       setIsConnected(true);
-      socket.emit("join-room", id);
+      socket.emit(SocketCode.JOIN_ROOM, id);
     }
 
     function onDisconnect() {
@@ -69,37 +60,38 @@ const PokerRoom = ({ id }: { id: string }) => {
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on(SocketCode.GET_ROOM + id, (data) => {
-      console.log(data);
-    });
 
     socket.on(SocketCode.ROOM_MESSAGE + id, (data) => {
       console.log(data);
       setRoomMessage(data.message);
     });
 
+    //监控房间渲染数据
+    socket.on(SocketCode.ROOM_DATA + id, (data) => {
+      console.log("room data:", data[0].data);
+      setRoomData(data[0].data);
+    });
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off(SocketCode.GET_ROOM + id);
       socket.off(SocketCode.ROOM_MESSAGE + id);
+      socket.off(SocketCode.ROOM_DATA + id);
     };
   }, [_initData.user?.firstName, id, walletAddress]); // 确保依赖地址和 launch 参数更新时重新绑定
 
-  const players = [
-    { id: 1, name: "Alice", chips: 1000, seatNumber: 1 },
-    { id: 2, name: "Bob", chips: 800, seatNumber: 2 },
-    { id: 3, name: "Charlie", chips: 1200, seatNumber: 3 },
-    { id: 4, name: "Diana", chips: 500, seatNumber: 4 },
-    { id: 5, name: "Eve", chips: 700, seatNumber: 5 },
-    { id: 6, name: "Frank", chips: 600, seatNumber: 6 },
-  ];
+  if (!roomData) {
+    return <div>Loading Room...</div>;
+  }
 
   return (
     <div>
       <RoomUI
-        players={players}
-        communicateCards={["SA", "SA", "SA", "SA", "SA"]}
+        minBuyIn={roomData.bigBlind * 20}
+        maxBuyIn={roomData.bigBlind * 100}
+        players={[]}
+        communicateCards={[]}
+        roomId={id}
       />
     </div>
   );

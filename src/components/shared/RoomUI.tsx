@@ -1,20 +1,71 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import PokerCard from "./PokerCard";
 import HoleCards from "./HoleCards";
-interface Player {
-  id: number;
-  name: string;
-  chips: number;
+import { Button } from "../ui/button";
+import { Socket } from "socket.io-client";
+import axios from "axios";
+import { useTonAddress } from "@tonconnect/ui-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
+
+interface IPlayer {
+  playerId: string;
+  playerName: string;
+  tonWalletAddress: string;
+  avatar: string;
+  chipsInGame: number;
+  currentBet: number;
+  hand: string[];
+  action: string;
 }
 
 interface Props {
-  players: Player[];
+  players: IPlayer[];
   communicateCards: string[];
+  roomId: string;
+  minBuyIn: number;
+  maxBuyIn: number;
 }
 
-const RoomUI = ({ players, communicateCards }: Props) => {
+const RoomUI = ({
+  roomId,
+  players,
+  communicateCards,
+  minBuyIn,
+  maxBuyIn,
+}: Props) => {
+  const [buyInAmount, setBuyInAmount] = useState(maxBuyIn);
+
+  const tonAddress = useTonAddress();
+
+  if (!tonAddress) {
+    return <div>you need to connect to ton wallet</div>;
+  }
+
+  const onSit = async (seatNumber: number) => {
+    try {
+      console.log("sit on seat:", seatNumber);
+      const response = await axios.post(
+        "http://localhost:8080/api/poker-room/sit",
+        {
+          seatNumber,
+          tonAddress,
+          roomId,
+          chips: buyInAmount,
+        },
+      );
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // 定义每个玩家的位置（顺时针，最多6个）
   const positions = [
     "bottom-4 left-4 transform -translate-y-3/4 ",
@@ -27,31 +78,77 @@ const RoomUI = ({ players, communicateCards }: Props) => {
 
   return (
     <div className="relative h-screen w-full bg-green-700">
-      {/* 渲染每个玩家 */}
-      {players.map((player, index) => (
-        <div
-          key={player.id}
-          className={`absolute ${positions[index]} flex size-20 items-center justify-center rounded-full border-2 border-gray-800 bg-white shadow-md`}
-        >
+      {/* 座位信息*/}
+      {positions.map((position, index) => {
+        const player = players[index];
+        return (
           <div
-            className={`absolute ${
-              index === 0 ? "-right-24 bottom-2" : "bottom-0"
-            } text-black`}
+            key={index}
+            className={`absolute ${position} flex size-20 items-center justify-center rounded-full border-2 border-gray-800 bg-white shadow-md`}
           >
-            <HoleCards
-              tonWalletAddress={""}
-              holeCards={[]}
-              seatNumber={index}
-            />
+            {player ? (
+              <>
+                <div
+                  className={`absolute ${
+                    index === 0 ? "-right-24 bottom-2" : "bottom-0"
+                  } text-black`}
+                >
+                  <HoleCards
+                    tonWalletAddress={""}
+                    holeCards={[]}
+                    seatNumber={index}
+                  />
+                </div>
+                <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
+                  <span className="w-full rounded-full border-[1px] border-white text-xs">
+                    {player.playerName}
+                  </span>
+                  <span className="text-xs">{player.chipsInGame} BB</span>
+                </div>
+              </>
+            ) : (
+              <Popover>
+                <PopoverTrigger>
+                  <span className="text-black">Sit</span>
+                </PopoverTrigger>
+                <PopoverContent className="flex flex-col items-center justify-center space-y-6">
+                  <div className="flex w-full flex-row items-center justify-between">
+                    <Button
+                      onClick={() => {
+                        setBuyInAmount(minBuyIn);
+                      }}
+                    >
+                      {minBuyIn}
+                    </Button>
+                    <span>{buyInAmount}</span>
+                    <Button
+                      onClick={() => {
+                        setBuyInAmount(maxBuyIn);
+                      }}
+                    >
+                      {maxBuyIn}
+                    </Button>
+                  </div>
+                  <Slider
+                    defaultValue={[maxBuyIn]}
+                    value={[buyInAmount]}
+                    min={minBuyIn}
+                    max={maxBuyIn}
+                    step={1}
+                    onValueChange={(value) => setBuyInAmount(value[0])}
+                  />
+                  <Button
+                    className="w-full bg-primary-300 text-white"
+                    onClick={() => onSit(index)}
+                  >
+                    Sit
+                  </Button>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
-          <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
-            <span className="w-full rounded-full border-[1px] border-white text-xs">
-              {player.name}
-            </span>
-            <span className="text-xs">{player.chips} BB</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* 添加公共牌区域 */}
       <div className="h-22 absolute left-1/2 top-1/2 flex w-[73%] -translate-x-1/2 -translate-y-full transform flex-col items-center justify-center space-y-2 rounded-lg">
@@ -69,10 +166,12 @@ const RoomUI = ({ players, communicateCards }: Props) => {
         </div>
         {/* 底池部分 */}
         <p>PotSize:1000</p>
+        <p>{tonAddress}</p>
       </div>
 
       {/* 新增玩家行动UI区域 */}
-      <div className="absolute bottom-0 left-0 flex w-full items-center justify-center bg-gray-800 py-2 text-white">
+
+      <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
         <div className="flex space-x-4">
           <button className="rounded bg-red-600 px-4 py-2 hover:bg-red-500">
             弃牌

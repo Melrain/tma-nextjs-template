@@ -8,6 +8,8 @@ export enum SocketCode {
   JOIN_ROOM_OBSERVER = "JOIN_ROOM_OBSERVER",
   LEAVE_ROOM_OBSERVER = "LEAVE_ROOM_OBSERVER",
   OBSERVER = "OBSERVER",
+  ROOM_DATA = "ROOM_DATA",
+  JOIN_ROOM = "JOIN_ROOM",
 }
 
 export enum EventCode {
