@@ -26,7 +26,7 @@ const ConnectWallet = () => {
             },
           );
 
-          setUserBalance(response.data.data.balance);
+          setUserBalance(response.data.balance);
           console.log("response:", response.data);
         }
       } catch (error) {

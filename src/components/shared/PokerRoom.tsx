@@ -70,6 +70,7 @@ const PokerRoom = ({ id }: { id: string }) => {
     socket.on(SocketCode.ROOM_DATA + id, (data) => {
       console.log("room data:", data[0].data);
       setRoomData(data[0].data);
+      setPlayerList(data[0].data.players);
     });
 
     return () => {
@@ -89,7 +90,7 @@ const PokerRoom = ({ id }: { id: string }) => {
       <RoomUI
         minBuyIn={roomData.bigBlind * 20}
         maxBuyIn={roomData.bigBlind * 100}
-        players={[]}
+        players={playerList}
         communicateCards={[]}
         roomId={id}
       />
