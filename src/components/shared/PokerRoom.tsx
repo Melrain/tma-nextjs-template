@@ -6,7 +6,6 @@ import { useTonAddress } from "@tonconnect/ui-react";
 
 import { SocketCode } from "@/types/SocketCode";
 import RoomUI from "./RoomUI";
-import { players } from "@/lib/FakeData";
 
 interface IRoomData {
   roomName: string;
@@ -14,7 +13,7 @@ interface IRoomData {
   host: string;
   deck: string[];
   communityCards: string[];
-  pot: number;
+  potSize: number;
   bigBlind: number;
   smallBlind: number;
   maxPlayers: number;
@@ -24,7 +23,7 @@ interface IRoomData {
 }
 
 const PokerRoom = ({ id }: { id: string }) => {
-  const [playerList, setPlayerList] = useState<[]>([]);
+  const [playerList, setPlayerList] = useState<any[]>([]);
   const [roomData, setRoomData] = useState<IRoomData>();
   const [roomMessage, setRoomMessage] = useState<string>("");
   const [isConnected, setIsConnected] = useState(false);
@@ -36,7 +35,7 @@ const PokerRoom = ({ id }: { id: string }) => {
 
   useEffect(() => {
     // const userFriendlyAddress = toUserFriendlyAddress(wallet.account.address);
-
+    console.log("roomId:", id);
     // 初始化 socket，只会被调用一次
     const socket = initializeSocket({
       url: "http://localhost:8080/",
@@ -67,10 +66,22 @@ const PokerRoom = ({ id }: { id: string }) => {
     });
 
     //监控房间渲染数据
-    socket.on(SocketCode.ROOM_DATA + id, (data) => {
-      console.log("room data:", data[0].data);
-      setRoomData(data[0].data);
-      setPlayerList(data[0].data.players);
+    socket.on(SocketCode.ROOM_DATA_UPDATE + id, (data) => {
+      console.log("room data:", data);
+      setRoomData(data);
+
+      // 重新排序玩家列表，确保当前玩家在最前面
+      const index = data.players.findIndex(
+        (player: { tonWalletAddress: string }) =>
+          player.tonWalletAddress === walletAddress,
+      );
+      const currentPlayer = data.players[index];
+      const reOrderedPlayers = [
+        currentPlayer,
+        ...data.players.filter((_: any, i: any) => i !== index).reverse(),
+      ];
+
+      setPlayerList(reOrderedPlayers);
     });
 
     return () => {
@@ -93,6 +104,7 @@ const PokerRoom = ({ id }: { id: string }) => {
         players={playerList}
         communicateCards={[]}
         roomId={id}
+        potSize={roomData.potSize}
       />
     </div>
   );

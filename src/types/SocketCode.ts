@@ -10,6 +10,7 @@ export enum SocketCode {
   OBSERVER = "OBSERVER",
   ROOM_DATA = "ROOM_DATA",
   JOIN_ROOM = "JOIN_ROOM",
+  ROOM_DATA_UPDATE = "ROOM_DATA_UPDATE",
 }
 
 export enum EventCode {

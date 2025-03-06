@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
+import Image from "next/image";
 
 interface IPlayer {
   playerId: string;
@@ -21,8 +22,8 @@ interface IPlayer {
   avatar: string;
   chipsInGame: number;
   currentBet: number;
-  hand: string[];
-  action: string;
+  holeCards: string[];
+  actionStatus: string;
 }
 
 interface Props {
@@ -31,6 +32,7 @@ interface Props {
   roomId: string;
   minBuyIn: number;
   maxBuyIn: number;
+  potSize: number;
 }
 
 const RoomUI = ({
@@ -39,6 +41,7 @@ const RoomUI = ({
   communicateCards,
   minBuyIn,
   maxBuyIn,
+  potSize,
 }: Props) => {
   const [buyInAmount, setBuyInAmount] = useState(maxBuyIn);
 
@@ -48,13 +51,12 @@ const RoomUI = ({
     return <div>you need to connect to ton wallet</div>;
   }
 
-  const onSit = async (seatNumber: number) => {
+  const onSit = async () => {
     try {
-      console.log("sit on seat:", seatNumber);
+      console.log("sitting");
       const response = await axios.post(
         "http://localhost:8080/api/poker-room/sit",
         {
-          seatNumber,
           tonAddress,
           roomId,
           chips: buyInAmount,
@@ -82,71 +84,83 @@ const RoomUI = ({
       {positions.map((position, index) => {
         const player = players[index];
         return (
-          <div
-            key={index}
-            className={`absolute ${position} flex size-20 items-center justify-center rounded-full border-2 border-gray-800 bg-white shadow-md`}
-          >
-            {player ? (
-              <>
-                <div
-                  className={`absolute ${
-                    index === 0 ? "-right-24 bottom-2" : "bottom-0"
-                  } text-black`}
-                >
-                  <HoleCards
-                    tonWalletAddress={""}
-                    holeCards={[]}
-                    seatNumber={index}
-                  />
-                </div>
-                <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
-                  <span className="w-full rounded-full border-[1px] border-white text-xs">
-                    {player.playerName}
-                  </span>
-                  <span className="text-xs">{player.chipsInGame} BB</span>
-                </div>
-              </>
-            ) : (
-              <Popover>
-                <PopoverTrigger>
-                  <span className="text-black">Sit</span>
-                </PopoverTrigger>
-                <PopoverContent className="flex flex-col items-center justify-center space-y-6">
-                  <div className="flex w-full flex-row items-center justify-between">
-                    <Button
-                      onClick={() => {
-                        setBuyInAmount(minBuyIn);
-                      }}
-                    >
-                      {minBuyIn}
-                    </Button>
-                    <span>{buyInAmount}</span>
-                    <Button
-                      onClick={() => {
-                        setBuyInAmount(maxBuyIn);
-                      }}
-                    >
-                      {maxBuyIn}
-                    </Button>
-                  </div>
-                  <Slider
-                    defaultValue={[maxBuyIn]}
-                    value={[buyInAmount]}
-                    min={minBuyIn}
-                    max={maxBuyIn}
-                    step={1}
-                    onValueChange={(value) => setBuyInAmount(value[0])}
-                  />
-                  <Button
-                    className="w-full bg-primary-300 text-white"
-                    onClick={() => onSit(index)}
+          <>
+            <div
+              key={index}
+              className={`absolute ${position} flex size-20 items-center justify-center rounded-full border-2 border-gray-800 bg-white shadow-md`}
+            >
+              <Image
+                className="absolute -z-50 size-full rounded-full"
+                width={100}
+                height={100}
+                src={player?.avatar}
+                alt="avatar"
+              />
+
+              {player ? (
+                <>
+                  <div
+                    className={`absolute ${
+                      index === 0 ? "-right-24 bottom-2" : "bottom-0"
+                    } text-black`}
                   >
-                    Sit
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            )}
-          </div>
+                    <HoleCards
+                      tonWalletAddress={player.tonWalletAddress}
+                      holeCards={player.holeCards}
+                      actionStatus={player.actionStatus}
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
+                    <span className="w-full rounded-full border-[1px] border-white text-xs">
+                      {player.playerName}
+                    </span>
+                    <span className="text-xs">{player.chipsInGame} BB</span>
+                  </div>
+                </>
+              ) : (
+                <Popover>
+                  {players[0]?.tonWalletAddress !== tonAddress && (
+                    <PopoverTrigger>
+                      <span className="text-black">Sit</span>
+                    </PopoverTrigger>
+                  )}
+                  <PopoverContent className="flex flex-col items-center justify-center space-y-6">
+                    <div className="flex w-full flex-row items-center justify-between">
+                      <Button
+                        onClick={() => {
+                          setBuyInAmount(minBuyIn);
+                        }}
+                      >
+                        {minBuyIn}
+                      </Button>
+                      <span>{buyInAmount}</span>
+                      <Button
+                        onClick={() => {
+                          setBuyInAmount(maxBuyIn);
+                        }}
+                      >
+                        {maxBuyIn}
+                      </Button>
+                    </div>
+                    <Slider
+                      defaultValue={[maxBuyIn]}
+                      value={[buyInAmount]}
+                      min={minBuyIn}
+                      max={maxBuyIn}
+                      step={1}
+                      onValueChange={(value) => setBuyInAmount(value[0])}
+                    />
+                    <Button
+                      className="w-full bg-primary-300 text-white"
+                      onClick={() => onSit()}
+                    >
+                      Sit
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+          </>
         );
       })}
 
@@ -165,28 +179,35 @@ const RoomUI = ({
           ))}
         </div>
         {/* 底池部分 */}
-        <p>PotSize:1000</p>
+        <p>PotSize:{potSize}</p>
         <p>{tonAddress}</p>
       </div>
 
       {/* 新增玩家行动UI区域 */}
 
-      <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
-        <div className="flex space-x-4">
-          <button className="rounded bg-red-600 px-4 py-2 hover:bg-red-500">
-            弃牌
-          </button>
-          <button className="rounded bg-green-600 px-4 py-2 hover:bg-green-500">
-            过牌
-          </button>
-          <button className="rounded bg-yellow-600 px-4 py-2 hover:bg-yellow-500">
-            跟注
-          </button>
-          <button className="rounded bg-blue-600 px-4 py-2 hover:bg-blue-500">
-            加注
-          </button>
+      {players[0]?.tonWalletAddress === tonAddress &&
+      players[0]?.actionStatus !== "waiting" ? (
+        <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
+          <div className="flex space-x-4">
+            <button className="rounded bg-red-600 px-4 py-2 hover:bg-red-500">
+              弃牌
+            </button>
+            <button className="rounded bg-green-600 px-4 py-2 hover:bg-green-500">
+              过牌
+            </button>
+            <button className="rounded bg-yellow-600 px-4 py-2 hover:bg-yellow-500">
+              跟注
+            </button>
+            <button className="rounded bg-blue-600 px-4 py-2 hover:bg-blue-500">
+              加注
+            </button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
+          waiting for your turn...
+        </div>
+      )}
     </div>
   );
 };

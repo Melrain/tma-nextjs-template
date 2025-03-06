@@ -84,7 +84,7 @@ const AllPokerRooms = () => {
       (response: { data: []; message: string; status: number }) => {
         console.log("get all rooms:", response);
         setAllPokerRooms(response.data);
-      }
+      },
     );
 
     socket.on(SocketCode.POKER_ROOMS_CHANGED, (payload) => {
@@ -94,14 +94,11 @@ const AllPokerRooms = () => {
       socket.emit(SocketCode.GET_ALL_ROOMS);
     });
 
-    socket.on("test", () => {
-      console.log("test");
-    });
-
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off(SocketCode.GET_ALL_ROOMS);
+      socket.off(SocketCode.POKER_ROOMS_CHANGED);
     };
   }, [wallet, userFriendlyAddress, _initData.user?.firstName]); // 确保依赖地址和 launch 参数更新时重新绑定
 
@@ -118,10 +115,8 @@ const AllPokerRooms = () => {
             players: [];
             maxPlayers: number;
           }) => (
-            <div
-              key={room._id}
-              className="flex flex-row">
-              <div className="flex flex-row space-x-4 justify-center items-center">
+            <div key={room._id} className="flex flex-row">
+              <div className="flex flex-row items-center justify-center space-x-4">
                 <span>{room.roomName}</span>
                 <span>
                   {room.bigBlind * 20}/{room.bigBlind * 100}
@@ -135,11 +130,12 @@ const AllPokerRooms = () => {
                   joinRoom(room._id, userFriendlyAddress);
                 }}
                 variant="secondary"
-                className="ml-2">
+                className="ml-2"
+              >
                 Enter
               </Button>
             </div>
-          )
+          ),
         )}
       </div>
     </div>
