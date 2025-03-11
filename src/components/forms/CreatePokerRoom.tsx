@@ -56,7 +56,6 @@ const CreatePokerRoom = () => {
       setIsCreating(true);
       const createRoomDto = {
         roomName: `${_initData.user?.firstName}'s room`,
-        players: [],
         observers: [],
         dealerSeat: null,
         nextSeatToAct: null,
@@ -65,6 +64,7 @@ const CreatePokerRoom = () => {
         gameStatus: GameStatus.WAITING,
         host: address,
         communityCards: [],
+        deck: [],
         potSize: 0,
         bigBlind: values.blindSize,
         smallBlind: values.blindSize / 2,
@@ -81,7 +81,7 @@ const CreatePokerRoom = () => {
 
       const response = await axios.post(
         "http://localhost:8080/api/poker-room",
-        createRoomDto
+        createRoomDto,
       );
       if (response.status !== 201) {
         setIsCreating(false);
@@ -98,7 +98,8 @@ const CreatePokerRoom = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 flex flex-col justify-center items-center w-full">
+        className="flex w-full flex-col items-center justify-center space-y-8"
+      >
         <FormField
           control={form.control}
           name="blindSize"
@@ -108,15 +109,14 @@ const CreatePokerRoom = () => {
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={String(field.value)}>
+                  defaultValue={String(field.value)}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="BlindSize" />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 5, 10, 20, 50, 100].map((size: number) => (
-                      <SelectItem
-                        key={size}
-                        value={String(size)}>
+                      <SelectItem key={size} value={String(size)}>
                         {size}
                       </SelectItem>
                     ))}
@@ -137,15 +137,14 @@ const CreatePokerRoom = () => {
               <FormControl>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={String(field.value)}>
+                  defaultValue={String(field.value)}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="players" />
                   </SelectTrigger>
                   <SelectContent>
                     {[6, 9].map((size: number) => (
-                      <SelectItem
-                        key={size}
-                        value={String(size)}>
+                      <SelectItem key={size} value={String(size)}>
                         {size}
                       </SelectItem>
                     ))}
@@ -157,9 +156,7 @@ const CreatePokerRoom = () => {
             </FormItem>
           )}
         />
-        <Button
-          type="submit"
-          disabled={isCreating}>
+        <Button type="submit" disabled={isCreating}>
           {isCreating ? "Creating..." : "Create Room"}
         </Button>
       </form>

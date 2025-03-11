@@ -6,4 +6,5 @@ export enum Action {
   ALL_IN = "ALL_IN",
   SMALL_BLIND = "SMALL_BLIND",
   BIG_BLIND = "BIG_BLIND",
+  WAITING = "WAITING",
 }
