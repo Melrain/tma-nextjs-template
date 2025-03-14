@@ -14,4 +14,5 @@ export type CardType = {
     | "Q"
     | "K"
     | "A";
+  faceDown: boolean;
 };

@@ -23,7 +23,7 @@ interface IPlayer {
   avatar: string;
   chipsInGame: number;
   currentBet: number;
-  holeCards: CardType[];
+  holeCards: CardType[] | null;
   actionStatus: string;
 }
 
@@ -35,6 +35,15 @@ interface Props {
   maxBuyIn: number;
   potSize: number;
   gameStatus: string;
+  initDataRaw: string;
+  myHoleCards: CardType[];
+  onSitFn: (tonAddress: string, roomId: string, chips: number) => void;
+  onLeaveFn: (tonAddress: string, roomId: string) => void;
+  onCheckMyHandsFn: (
+    initDataRaw: string,
+    roomId: string,
+    tonAddress: string,
+  ) => void;
 }
 
 const RoomUI = ({
@@ -45,6 +54,11 @@ const RoomUI = ({
   maxBuyIn,
   potSize,
   gameStatus,
+  myHoleCards,
+  onLeaveFn,
+  onSitFn,
+  onCheckMyHandsFn,
+  initDataRaw,
 }: Props) => {
   const [buyInAmount, setBuyInAmount] = useState(maxBuyIn);
 
@@ -53,34 +67,6 @@ const RoomUI = ({
   if (!tonAddress) {
     return <div>you need to connect to ton wallet</div>;
   }
-
-  const onSit = async () => {
-    try {
-      console.log("sitting");
-      const response = await axios.post(
-        "http://localhost:8080/api/poker-room/sit",
-        {
-          tonAddress,
-          roomId,
-          chips: buyInAmount,
-        },
-      );
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const onLeaveRoom = async () => {
-    try {
-      await axios.post("http://localhost:8080/api/poker-room/leave", {
-        tonAddress,
-        roomId,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   // 定义每个玩家的位置（顺时针，最多6个）
   const positions = [
@@ -120,9 +106,19 @@ const RoomUI = ({
                   <HoleCards
                     showDown={false}
                     tonWalletAddress={player.tonWalletAddress}
-                    holeCards={player.holeCards}
+                    holeCards={myHoleCards}
                     actionStatus={player.actionStatus}
                   />
+                  {player.tonWalletAddress === tonAddress && (
+                    <button
+                      onClick={() => {
+                        onCheckMyHandsFn(initDataRaw, roomId, tonAddress);
+                      }}
+                      className="absolute -bottom-4 w-full rounded-full border-2 border-black bg-black text-center font-extrabold text-white shadow-lg shadow-white"
+                    >
+                      Check My Hands
+                    </button>
+                  )}
                 </div>
                 <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
                   <span className="w-full rounded-full border-[1px] border-white text-xs">
@@ -134,7 +130,7 @@ const RoomUI = ({
             ) : (
               <Popover>
                 {players[0]?.tonWalletAddress !== tonAddress && (
-                  <PopoverTrigger>
+                  <PopoverTrigger asChild>
                     <span className="text-black">Sit</span>
                   </PopoverTrigger>
                 )}
@@ -166,7 +162,7 @@ const RoomUI = ({
                   />
                   <Button
                     className="w-full bg-primary-300 text-white"
-                    onClick={() => onSit()}
+                    onClick={() => onSitFn(tonAddress, roomId, buyInAmount)}
                   >
                     Sit
                   </Button>
@@ -224,7 +220,7 @@ const RoomUI = ({
         <div className="absolute right-0 top-0 flex items-center justify-center">
           <Button
             onClick={() => {
-              onLeaveRoom();
+              onLeaveFn(tonAddress, roomId);
             }}
           >
             Leave Room

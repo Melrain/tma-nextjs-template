@@ -10,11 +10,13 @@ export const initializeSocket = ({
   username,
   roomid,
   url,
+  initDataRaw,
 }: {
   tonwallet: string;
   username: string;
   roomid: string;
   url: string;
+  initDataRaw: string;
 }) => {
   // if (socket) {
   //   socket.disconnect();
@@ -24,6 +26,7 @@ export const initializeSocket = ({
       tonwallet,
       username,
       roomid,
+      initDataRaw,
     },
   });
   return socket;

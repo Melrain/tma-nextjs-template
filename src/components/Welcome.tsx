@@ -14,23 +14,25 @@ const Welcome = () => {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col justify-center space-y-6 items-center h-screen">
+    <div className="flex h-screen flex-col items-center justify-center space-y-6">
       <h1>Welcome!</h1>
       <div>
         <ConnectWallet />
       </div>
-      <div className="flex flex-col space-y-6 justify-center items-center">
+      <div className="flex flex-col items-center justify-center space-y-6">
         <Button
           onClick={() => router.push("/poker-rooms")}
           disabled={!wallet}
-          className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
+          className="flex flex-row items-center justify-center space-x-2 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 p-2 shadow-sm shadow-white"
+        >
           <GiPokerHand />
           <span>Go to Poker</span>
         </Button>
         <Button
           onClick={() => router.push("/create-poker-room")}
           disabled={!wallet}
-          className="flex justify-center p-2 shadow-sm shadow-white rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500  items-center flex-row space-x-2">
+          className="flex flex-row items-center justify-center space-x-2 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 p-2 shadow-sm shadow-white"
+        >
           <GiPokerHand />
           <span>创建房间</span>
         </Button>

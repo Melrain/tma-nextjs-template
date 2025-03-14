@@ -13,21 +13,11 @@ interface Props {
   showDown: boolean | null;
 }
 
-const HoleCards = ({
-  tonWalletAddress,
-  holeCards,
-  actionStatus,
-  showDown,
-}: Props) => {
-  const [faceDown, setFaceDown] = useState(true);
+const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
   const walletAddress = useTonAddress();
   if (!actionStatus || actionStatus === Action.WAITING) {
     return;
   }
-
-  const onShowHoleCards = () => {
-    setFaceDown(false);
-  };
 
   return (
     <div
@@ -37,31 +27,22 @@ const HoleCards = ({
         classNames={`${tonWalletAddress === walletAddress ? "" : "-rotate-[10deg]"}`}
         width="w-[2.8rem]"
         height="h-[3.8rem]"
-        suit={holeCards[0]?.suit.toUpperCase()}
-        rank={holeCards[0]?.rank.toUpperCase()}
-        faceDown={faceDown}
+        suit={holeCards[0].suit.toUpperCase()}
+        rank={holeCards[0].rank.toLocaleUpperCase()}
+        faceDown={
+          tonWalletAddress === walletAddress ? holeCards[0].faceDown : true
+        }
       />
       <PokerCard
         classNames={`${tonWalletAddress === walletAddress ? "" : "rotate-[10deg]"}`}
         width="w-[2.8rem]"
         height="h-[3.8rem]"
-        suit={holeCards[1]?.suit.toUpperCase()}
-        rank={holeCards[1]?.rank.toUpperCase()}
-        faceDown={faceDown}
+        suit={holeCards[1].suit.toLocaleUpperCase()}
+        rank={holeCards[1].rank.toLocaleUpperCase()}
+        faceDown={
+          tonWalletAddress === walletAddress ? holeCards[0].faceDown : true
+        }
       />
-      {holeCards[0] &&
-        faceDown &&
-        holeCards[1] &&
-        tonWalletAddress === walletAddress && (
-          <button
-            onClick={() => {
-              onShowHoleCards();
-            }}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-white p-1"
-          >
-            <p className="text-xs">查看</p>
-          </button>
-        )}
     </div>
   );
 };

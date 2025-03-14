@@ -54,6 +54,7 @@ const AllPokerRooms = () => {
       tonwallet: userFriendlyAddress,
       username,
       roomid,
+      initDataRaw: initData.raw()!,
     });
 
     if (socket.connected) {
