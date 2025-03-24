@@ -16,6 +16,8 @@ export enum SocketCode {
   CHANGE_STREAM_STARTED = "CHANGE_STREAM_STARTED",
   SHOW_DOWN = "SHOW_DOWN",
   GET_MY_HOLE_CARDS = "GET_MY_HOLE_CARDS",
+  ON_ACTION = "ON_ACTION",
+  CAN_ACTION = "CAN_ACTION",
 }
 
 export enum EventCode {

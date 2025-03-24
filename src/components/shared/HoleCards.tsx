@@ -11,6 +11,7 @@ interface Props {
   holeCards: CardType[];
   actionStatus: string;
   showDown: boolean | null;
+  faceDown: boolean;
 }
 
 const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
@@ -27,20 +28,20 @@ const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
         classNames={`${tonWalletAddress === walletAddress ? "" : "-rotate-[10deg]"}`}
         width="w-[2.8rem]"
         height="h-[3.8rem]"
-        suit={holeCards[0].suit.toUpperCase()}
-        rank={holeCards[0].rank.toLocaleUpperCase()}
+        suit={holeCards?.[0]?.suit.toUpperCase() || ""}
+        rank={holeCards?.[0]?.rank.toLocaleUpperCase() || ""}
         faceDown={
-          tonWalletAddress === walletAddress ? holeCards[0].faceDown : true
+          tonWalletAddress === walletAddress ? holeCards?.[0]?.faceDown : true
         }
       />
       <PokerCard
         classNames={`${tonWalletAddress === walletAddress ? "" : "rotate-[10deg]"}`}
         width="w-[2.8rem]"
         height="h-[3.8rem]"
-        suit={holeCards[1].suit.toLocaleUpperCase()}
-        rank={holeCards[1].rank.toLocaleUpperCase()}
+        suit={holeCards?.[1]?.suit.toLocaleUpperCase() || ""}
+        rank={holeCards?.[1]?.rank.toLocaleUpperCase() || ""}
         faceDown={
-          tonWalletAddress === walletAddress ? holeCards[0].faceDown : true
+          tonWalletAddress === walletAddress ? holeCards?.[1]?.faceDown : true
         }
       />
     </div>

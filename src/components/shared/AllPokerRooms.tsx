@@ -5,11 +5,9 @@ import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useTonAddress, useTonWallet } from "@tonconnect/ui-react";
 import { initializeSocket, getSocket } from "../../lib/socketService"; // 导入封装的 socketService
 import { SocketCode } from "@/types/SocketCode";
-import Link from "next/link";
-import ConnectWallet from "./ConnectWallet";
-import { Slider } from "@/components/ui/slider";
 
-import axios from "axios";
+import ConnectWallet from "./ConnectWallet";
+
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 

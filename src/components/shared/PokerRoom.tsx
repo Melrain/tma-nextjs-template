@@ -1,6 +1,6 @@
 "use client";
 import { getSocket, initializeSocket } from "@/lib/socketService";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, act } from "react";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useTonAddress } from "@tonconnect/ui-react";
 
@@ -9,10 +9,11 @@ import RoomUI from "./RoomUI";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { CardType } from "@/types/CardType";
 
 interface IRoomData {
   roomName: string;
-  players: [];
+  players: { tonWalletAddress: string; holeCards: CardType[] }[];
   host: string;
   communityCards: string[];
   potSize: number;
@@ -22,59 +23,19 @@ interface IRoomData {
   currentTurnPlayer: string;
   gameStatus: string;
   rounds: number;
+  currentMinBet: number;
 }
 
 const PokerRoom = ({ id }: { id: string }) => {
   const [playerList, setPlayerList] = useState<any[]>([]);
   const [roomData, setRoomData] = useState<IRoomData>();
-  const [myHoleCards, setMyHoleCards] = useState<
-    {
-      suit: "s" | "h" | "d" | "c";
-      rank:
-        | "2"
-        | "3"
-        | "4"
-        | "5"
-        | "6"
-        | "7"
-        | "8"
-        | "9"
-        | "10"
-        | "J"
-        | "Q"
-        | "K"
-        | "A";
-      faceDown: boolean;
-    }[]
-  >([
-    {
-      suit: "s",
-      rank: "2",
-      faceDown: true,
-    },
-    {
-      suit: "s",
-      rank: "3",
-      faceDown: true,
-    },
-  ]);
+  const [canAction, setCanAction] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [avaliableActions, setAvaliableActions] = useState<string[]>([]);
+
   const walletAddress = useTonAddress();
 
-  const router = useRouter();
   const _initData = parseInitData(initData.raw());
-
-  const onRefresh = async () => {
-    try {
-      const roomId = id;
-      const response = await axios.get(
-        `http://localhost:8080/api/poker-room/room/${roomId}`,
-      );
-      console.log(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const onSit = async (tonAddress: string, roomId: string, chips: number) => {
     try {
@@ -85,6 +46,7 @@ const PokerRoom = ({ id }: { id: string }) => {
           tonAddress,
           roomId,
           chips,
+          initDataRaw: initData.raw() || "",
         },
       );
       console.log(response);
@@ -102,8 +64,22 @@ const PokerRoom = ({ id }: { id: string }) => {
           roomId,
         },
       );
-
       console.log("leave room response:", response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onActionClick = (action: string, amount?: number) => {
+    try {
+      console.log("on action click:", action, walletAddress);
+      const socket = getSocket();
+      socket.emit(SocketCode.ON_ACTION, {
+        roomId: id,
+        action,
+        tonWalletAddress: walletAddress,
+        amount: amount,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -154,7 +130,14 @@ const PokerRoom = ({ id }: { id: string }) => {
       setPlayerList(reOrderedPlayers);
     }
 
-    function handleShowDown() {}
+    function handleCanAction(response: {
+      canAction: boolean;
+      actions: string[];
+    }) {
+      console.log("can action res:", response);
+      setAvaliableActions(response.actions);
+      setCanAction(response.canAction);
+    }
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -163,6 +146,8 @@ const PokerRoom = ({ id }: { id: string }) => {
       handleRoomDataUpdate,
     );
 
+    socket.on(SocketCode.CAN_ACTION + id + walletAddress, handleCanAction);
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
@@ -170,6 +155,8 @@ const PokerRoom = ({ id }: { id: string }) => {
         SocketCode.ROOM_DATA_UPDATE + id + walletAddress,
         handleRoomDataUpdate,
       );
+
+      socket.off(SocketCode.CAN_ACTION + id + walletAddress, handleCanAction);
     };
   }, [_initData.user?.firstName, id, walletAddress]);
 
@@ -195,6 +182,10 @@ const PokerRoom = ({ id }: { id: string }) => {
   return (
     <div>
       <RoomUI
+        avaliableActions={avaliableActions}
+        currentMinBet={roomData.currentMinBet}
+        onActionClick={onActionClick}
+        canAction={canAction}
         gameStatus={roomData.gameStatus}
         minBuyIn={roomData.bigBlind * 20}
         maxBuyIn={roomData.bigBlind * 100}
@@ -206,17 +197,21 @@ const PokerRoom = ({ id }: { id: string }) => {
         onSitFn={onSit}
         onLeaveFn={onLeaveRoom}
         onCheckMyHandsFn={() => {}}
-        myHoleCards={myHoleCards}
+        myHoleCards={
+          roomData.players.find(
+            (player: { tonWalletAddress: string; holeCards: CardType[] }) =>
+              player.tonWalletAddress === walletAddress,
+          )?.holeCards || []
+        }
       />
-      <div className="absolute left-1/2 top-0">
-        <Button
-          onClick={() => {
-            onRefresh();
-          }}
-        >
-          get room
-        </Button>
-      </div>
+      <button
+        onClick={() => {
+          window.location.reload();
+        }}
+        className="absolute left-1/2 top-0"
+      >
+        刷新房间
+      </button>
     </div>
   );
 };

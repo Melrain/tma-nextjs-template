@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import PokerCard from "./PokerCard";
 import HoleCards from "./HoleCards";
 import { Button } from "../ui/button";
-import { Socket } from "socket.io-client";
-import axios from "axios";
 import { useTonAddress } from "@tonconnect/ui-react";
 import {
   Popover,
@@ -15,6 +13,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import Image from "next/image";
 import { CardType } from "@/types/CardType";
+import { Action } from "@/types/ActionStatus";
 
 interface IPlayer {
   playerId: string;
@@ -23,8 +22,9 @@ interface IPlayer {
   avatar: string;
   chipsInGame: number;
   currentBet: number;
-  holeCards: CardType[] | null;
+  holeCards: CardType[];
   actionStatus: string;
+  canAction: boolean;
 }
 
 interface Props {
@@ -36,7 +36,9 @@ interface Props {
   potSize: number;
   gameStatus: string;
   initDataRaw: string;
+  avaliableActions: string[];
   myHoleCards: CardType[];
+  currentMinBet: number;
   onSitFn: (tonAddress: string, roomId: string, chips: number) => void;
   onLeaveFn: (tonAddress: string, roomId: string) => void;
   onCheckMyHandsFn: (
@@ -44,9 +46,12 @@ interface Props {
     roomId: string,
     tonAddress: string,
   ) => void;
+  canAction: boolean;
+  onActionClick: (action: string, amount?: number) => void;
 }
 
 const RoomUI = ({
+  avaliableActions,
   roomId,
   players,
   communicateCards,
@@ -57,11 +62,12 @@ const RoomUI = ({
   myHoleCards,
   onLeaveFn,
   onSitFn,
-  onCheckMyHandsFn,
-  initDataRaw,
+  canAction,
+  onActionClick,
+  currentMinBet,
 }: Props) => {
   const [buyInAmount, setBuyInAmount] = useState(maxBuyIn);
-
+  const [faceDown, setFaceDown] = useState(true);
   const tonAddress = useTonAddress();
 
   if (!tonAddress) {
@@ -104,21 +110,22 @@ const RoomUI = ({
                   } text-black`}
                 >
                   <HoleCards
+                    faceDown={false}
                     showDown={false}
                     tonWalletAddress={player.tonWalletAddress}
                     holeCards={myHoleCards}
                     actionStatus={player.actionStatus}
                   />
-                  {player.tonWalletAddress === tonAddress && (
+                  {/* {player.tonWalletAddress === tonAddress && (
                     <button
                       onClick={() => {
-                        onCheckMyHandsFn(initDataRaw, roomId, tonAddress);
+                        setFaceDown(false);
                       }}
                       className="absolute -bottom-4 w-full rounded-full border-2 border-black bg-black text-center font-extrabold text-white shadow-lg shadow-white"
                     >
                       Check My Hands
                     </button>
-                  )}
+                  )} */}
                 </div>
                 <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
                   <span className="w-full rounded-full border-[1px] border-white text-xs">
@@ -131,7 +138,12 @@ const RoomUI = ({
               <Popover>
                 {players[0]?.tonWalletAddress !== tonAddress && (
                   <PopoverTrigger asChild>
-                    <span className="text-black">Sit</span>
+                    <button
+                      className="text-black"
+                      disabled={gameStatus !== "waiting"}
+                    >
+                      Sit
+                    </button>
                   </PopoverTrigger>
                 )}
                 <PopoverContent className="flex flex-col items-center justify-center space-y-6">
@@ -161,6 +173,7 @@ const RoomUI = ({
                     onValueChange={(value) => setBuyInAmount(value[0])}
                   />
                   <Button
+                    disabled={gameStatus !== "waiting"}
                     className="w-full bg-primary-300 text-white"
                     onClick={() => onSitFn(tonAddress, roomId, buyInAmount)}
                   >
@@ -189,27 +202,29 @@ const RoomUI = ({
         </div>
         {/* 底池部分 */}
         <p>PotSize:{potSize}</p>
+        <p>CurrentMinBet:{currentMinBet}</p>
       </div>
 
       {/* 新增玩家行动UI区域 */}
 
-      {players[0]?.tonWalletAddress === tonAddress &&
+      {canAction &&
+      players[0]?.tonWalletAddress === tonAddress &&
       players[0]?.actionStatus !== "waiting" ? (
         <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
-          <div className="flex space-x-4">
-            <button className="rounded bg-red-600 px-4 py-2 hover:bg-red-500">
-              弃牌
-            </button>
-            <button className="rounded bg-green-600 px-4 py-2 hover:bg-green-500">
-              过牌
-            </button>
-            <button className="rounded bg-yellow-600 px-4 py-2 hover:bg-yellow-500">
-              跟注
-            </button>
-            <button className="rounded bg-blue-600 px-4 py-2 hover:bg-blue-500">
-              加注
-            </button>
-          </div>
+          {avaliableActions.map((action) => (
+            <Button
+              key={action}
+              onClick={() => {
+                if (action === Action.RAISE) {
+                  onActionClick(action, currentMinBet * 2);
+                } else {
+                  onActionClick(action);
+                }
+              }}
+            >
+              {action}
+            </Button>
+          ))}
         </div>
       ) : (
         <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
@@ -219,6 +234,7 @@ const RoomUI = ({
       {players[0]?.tonWalletAddress === tonAddress && (
         <div className="absolute right-0 top-0 flex items-center justify-center">
           <Button
+            disabled={!canAction}
             onClick={() => {
               onLeaveFn(tonAddress, roomId);
             }}
