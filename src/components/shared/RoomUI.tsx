@@ -25,6 +25,7 @@ interface IPlayer {
   holeCards: CardType[];
   actionStatus: string;
   canAction: boolean;
+  isPlaying: boolean;
 }
 
 interface Props {
@@ -36,7 +37,7 @@ interface Props {
   potSize: number;
   gameStatus: string;
   initDataRaw: string;
-  avaliableActions: string[];
+  avaliableActions: Action[];
   myHoleCards: CardType[];
   currentMinBet: number;
   onSitFn: (tonAddress: string, roomId: string, chips: number) => void;
@@ -116,16 +117,6 @@ const RoomUI = ({
                     holeCards={myHoleCards}
                     actionStatus={player.actionStatus}
                   />
-                  {/* {player.tonWalletAddress === tonAddress && (
-                    <button
-                      onClick={() => {
-                        setFaceDown(false);
-                      }}
-                      className="absolute -bottom-4 w-full rounded-full border-2 border-black bg-black text-center font-extrabold text-white shadow-lg shadow-white"
-                    >
-                      Check My Hands
-                    </button>
-                  )} */}
                 </div>
                 <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
                   <span className="w-full rounded-full border-[1px] border-white text-xs">
@@ -138,12 +129,7 @@ const RoomUI = ({
               <Popover>
                 {players[0]?.tonWalletAddress !== tonAddress && (
                   <PopoverTrigger asChild>
-                    <button
-                      className="text-black"
-                      disabled={gameStatus !== "waiting"}
-                    >
-                      Sit
-                    </button>
+                    <span className="text-black">Sit</span>
                   </PopoverTrigger>
                 )}
                 <PopoverContent className="flex flex-col items-center justify-center space-y-6">
@@ -173,7 +159,6 @@ const RoomUI = ({
                     onValueChange={(value) => setBuyInAmount(value[0])}
                   />
                   <Button
-                    disabled={gameStatus !== "waiting"}
                     className="w-full bg-primary-300 text-white"
                     onClick={() => onSitFn(tonAddress, roomId, buyInAmount)}
                   >
@@ -209,7 +194,7 @@ const RoomUI = ({
 
       {canAction &&
       players[0]?.tonWalletAddress === tonAddress &&
-      players[0]?.actionStatus !== "waiting" ? (
+      players[0]?.isPlaying ? (
         <div className="absolute bottom-0 left-0 flex w-full items-center justify-center py-6 text-white">
           {avaliableActions.map((action) => (
             <Button
@@ -243,8 +228,12 @@ const RoomUI = ({
           </Button>
         </div>
       )}
-      <div className="absolute left-0 top-0 flex items-center justify-center">
+      <div className="absolute left-0 top-0 flex items-center justify-center space-x-2">
         {gameStatus}
+      </div>
+      <div className="absolute bottom-0 left-0 flex items-center justify-center">
+        {canAction ? "canAction" : "cannotAction"}
+        {players[0]?.isPlaying ? "isPlaying" : "isNotPlaying"}
       </div>
     </div>
   );

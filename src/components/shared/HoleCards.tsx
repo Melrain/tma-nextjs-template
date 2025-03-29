@@ -16,9 +16,9 @@ interface Props {
 
 const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
   const walletAddress = useTonAddress();
-  if (!actionStatus || actionStatus === Action.WAITING) {
-    return;
-  }
+  // if (!actionStatus || actionStatus === Action.WAITING) {
+  //   return;
+  // }
 
   return (
     <div
@@ -30,9 +30,7 @@ const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
         height="h-[3.8rem]"
         suit={holeCards?.[0]?.suit.toUpperCase() || ""}
         rank={holeCards?.[0]?.rank.toLocaleUpperCase() || ""}
-        faceDown={
-          tonWalletAddress === walletAddress ? holeCards?.[0]?.faceDown : true
-        }
+        faceDown={false}
       />
       <PokerCard
         classNames={`${tonWalletAddress === walletAddress ? "" : "rotate-[10deg]"}`}
@@ -40,9 +38,7 @@ const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
         height="h-[3.8rem]"
         suit={holeCards?.[1]?.suit.toLocaleUpperCase() || ""}
         rank={holeCards?.[1]?.rank.toLocaleUpperCase() || ""}
-        faceDown={
-          tonWalletAddress === walletAddress ? holeCards?.[1]?.faceDown : true
-        }
+        faceDown={false}
       />
     </div>
   );

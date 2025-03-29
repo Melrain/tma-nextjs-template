@@ -10,6 +10,7 @@ import axios from "axios";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { CardType } from "@/types/CardType";
+import { Action } from "@/types/ActionStatus";
 
 interface IRoomData {
   roomName: string;
@@ -31,7 +32,7 @@ const PokerRoom = ({ id }: { id: string }) => {
   const [roomData, setRoomData] = useState<IRoomData>();
   const [canAction, setCanAction] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [avaliableActions, setAvaliableActions] = useState<string[]>([]);
+  const [avaliableActions, setAvaliableActions] = useState<Action[]>([]);
 
   const walletAddress = useTonAddress();
 
@@ -126,13 +127,12 @@ const PokerRoom = ({ id }: { id: string }) => {
         currentPlayer,
         ...data.players.filter((_: any, i: any) => i !== index).reverse(),
       ];
-
       setPlayerList(reOrderedPlayers);
     }
 
     function handleCanAction(response: {
       canAction: boolean;
-      actions: string[];
+      actions: Action[];
     }) {
       console.log("can action res:", response);
       setAvaliableActions(response.actions);

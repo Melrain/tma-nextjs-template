@@ -1,5 +1,5 @@
 export type CardType = {
-  suit: "h" | "d" | "c" | "s";
+  suit: "h" | "d" | "c" | "s" | "empty";
   rank:
     | "2"
     | "3"
@@ -13,6 +13,6 @@ export type CardType = {
     | "J"
     | "Q"
     | "K"
+    | "empty"
     | "A";
-  faceDown: boolean;
 };
