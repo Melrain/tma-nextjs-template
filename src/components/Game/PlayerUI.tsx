@@ -7,9 +7,9 @@ import { CardType } from "@/types/CardType";
 interface PlayerUIProps {
   positionCss: string;
   index: number;
-  hands: CardType[];
+  handCards: CardType[];
 }
-const PlayerUI = ({ positionCss, index, hands }: PlayerUIProps) => {
+const PlayerUI = ({ positionCss, index, handCards }: PlayerUIProps) => {
   return (
     <div
       key={index}
@@ -30,9 +30,7 @@ const PlayerUI = ({ positionCss, index, hands }: PlayerUIProps) => {
         {/* hands */}
         <div
           className={`absolute ${index === 0 ? "-right-24 bottom-2" : "bottom-0"}`}
-        >
-          {}
-        </div>
+        ></div>
       </div>
       <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
         <span className="w-full rounded-full border-[1px] border-white text-xs">

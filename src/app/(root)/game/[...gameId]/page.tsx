@@ -11,8 +11,12 @@ import Image from "next/image";
 import HoleCards from "@/components/shared/HoleCards";
 import PlayerUI from "@/components/Game/PlayerUI";
 
+type GameParams = {
+  gameId: string;
+};
+
 const Page = () => {
-  const { gameId } = useParams();
+  const { gameId } = useParams() as GameParams;
   const [isConnected, setIsConnected] = useState(false);
   const userData = parseInitData(initData.raw());
 
@@ -66,7 +70,20 @@ const Page = () => {
       <div>
         {positions.map((position, index) => (
           <div key={position}>
-            <PlayerUI positionCss={position} index={index} hands={[]} />
+            <PlayerUI
+              positionCss={position}
+              index={index}
+              handCards={[
+                {
+                  rank: "2",
+                  suit: "s",
+                },
+                {
+                  rank: "A",
+                  suit: "h",
+                },
+              ]}
+            />
           </div>
         ))}
       </div>
