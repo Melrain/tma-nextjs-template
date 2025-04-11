@@ -9,15 +9,19 @@ export interface IGame {
   currentPlayerId: string; // 当前轮到操作的玩家ID
   communityCards: CommunityCards; // 公共牌（翻牌、转牌、河牌）
   actions: PlayerAction[]; // 记录所有玩家的操作
+  bigBlind: number; // 大盲注金额
+  currentMinBet: number; // 当前最小下注金额
+  lastRaiserId?: string; // 最后加注玩家的ID
 }
 
 export interface IPlayer {
   playerId: string; // 玩家唯一标识符
   username: string; // 玩家用户名
+  avatar: string; // 玩家头像
   status: PlayerStatus; // 玩家当前状态 (如：InGame, Folded)
   totalChips: number; // 玩家总筹码
   bet: number; // 玩家当前下注金额
-  hand: Card[]; // 玩家手牌（两张私人牌）
+  handCards: Card[]; // 玩家手牌（两张私人牌）
   currentAction: PlayerAction | null; // 玩家当前行动（下注、加注等）
   preAction: PreAction; // 玩家预先选择的动作（如Fold、Call等）
 }
@@ -37,11 +41,24 @@ export enum GamePhase {
   Showdown, // 摊牌阶段
   Ended, // 游戏结束阶段
 }
-
-export interface Card {
-  rank: string; // 牌的点数（2-10, J, Q, K, A）
-  suit: string; // 牌的花色（Hearts, Diamonds, Clubs, Spades）
-}
+export type Card = {
+  suit: "h" | "d" | "c" | "s" | "empty";
+  rank:
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "J"
+    | "Q"
+    | "K"
+    | "empty"
+    | "A";
+};
 
 export enum PlayerStatus {
   Waiting, // 等待阶段
@@ -60,7 +77,6 @@ export interface IRoom {
   gameId: string; // 房间的唯一标识符
   logs: string[]; // 游戏历史记录
 }
-
 export interface PlayerAction {
   type: ActionType; // 玩家操作类型 (Call, Raise, Check, Fold等)
   amount: number; // 对应的下注金额（例如：Raise 的金额）
@@ -72,6 +88,8 @@ export enum ActionType {
   Check, // 过牌
   Fold, // 弃牌
   AllIn, // 全押
+  Check_Fold, // 过牌弃牌
+  None, // 无操作
 }
 
 export enum CODE {
@@ -81,4 +99,9 @@ export enum CODE {
   JOIN_GAME = "JOIN_GAME",
   REDIS_PRIVATE_DATA = "REDIS_PRIVATE_DATA",
   REDIS_HASH_GET_GAME = "REDIS_HASH_GET_GAME",
+  REDIS_TOUCH = "REDIS_TOUCH",
+  TIMER = "TIMER",
+  PLAYER_ACTION = "PLAYER_ACTION",
+  PLAYER_PRE_ACTION = "PLAYER_PRE_ACTION",
+  AVAILABLE_ACTIONS = "AVAILABLE_ACTIONS",
 }

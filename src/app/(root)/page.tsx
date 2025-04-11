@@ -17,23 +17,32 @@ interface IPokerRoom {
   players: IPlayer[];
 }
 
+function useUniqueGames(games: any[]) {
+  return Array.from(new Map(games.map((g) => [g.gameId, g])).values());
+}
+
 const page = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [games, setGames] = useState([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{
+    username: string;
+    balance: number;
+  } | null>(null);
   const socket = useSocket();
   const userData = parseInitData(initData.raw());
   const tonWalletAddress = useTonAddress();
   const [buyInAmount, setBuyInAmount] = useState(100);
 
   const router = useRouter();
-  //创建游戏
+
   const onCreateGame = async () => {
     try {
       const response = await axios.post(
         "http://localhost:8080/api/game/create",
         {
+          userId: userData.user?.id,
           createGameDto: {
+            gameId: userData.user?.id,
             gameName: `${userData.user?.firstName}的游戏`,
             gamePhase: GamePhase.Waiting,
             players: [],
@@ -41,6 +50,7 @@ const page = () => {
             waitingList: [],
             bigBlind: 1,
             pot: 0,
+            currentMinBet: 0,
             dealerId: "",
             currentPlayerId: "",
             communityCards: {
@@ -58,7 +68,6 @@ const page = () => {
     }
   };
 
-  //加入游戏
   const joinGame = async (gameId: string) => {
     try {
       const response = await axios.post(
@@ -68,49 +77,61 @@ const page = () => {
           username: userData.user?.firstName,
           playerId: userData.user?.id,
           buyInAmount: 100,
+          avatar: userData.user?.photoUrl,
         },
       );
-      console.log(response.data);
+      if (response) {
+        router.push(`/game/${gameId}`);
+      }
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
-    socket.on("connect", async () => {
-      setIsConnected(true);
-      //获取用户信息
-      const userResponse = await axios.post(
-        "http://localhost:8080/api/user/login",
-        {
-          userId: userData.user?.id,
-          username: userData.user?.firstName,
-          walletAddress: tonWalletAddress,
-          avatar: userData.user?.photoUrl,
-        },
-      );
-      if (userResponse.data) {
-        console.log(userResponse.data);
-        setUser(userResponse.data);
-      }
+    const fetchData = async () => {
+      try {
+        const createUserResponse = await axios.post(
+          "http://localhost:8080/api/user/login",
+          {
+            userId: userData.user?.id,
+            username: userData.user?.firstName,
+            walletAddress: tonWalletAddress,
+            avatar: userData.user?.photoUrl,
+          },
+        );
+        if (createUserResponse.data) {
+          setUser(createUserResponse.data);
+        }
 
-      // 获取房间列表
+        const gamesResponse = await axios.get(
+          "http://localhost:8080/api/game/all",
+        );
+        if (gamesResponse.data) {
+          setGames(gamesResponse.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+
+    setIsConnected(socket.connected);
+
+    socket.on("connect", async () => {});
+
+    socket.on("disconnect", () => {
+      console.log("disconnected");
+    });
+
+    socket.on(CODE.REDIS_TOUCH, async () => {
       const gamesResponse = await axios.get(
         "http://localhost:8080/api/game/all",
       );
       if (gamesResponse.data) {
-        console.log("games:", gamesResponse.data);
         setGames(gamesResponse.data.data);
       }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("disconnected");
-      setIsConnected(false);
-    });
-
-    socket.on(CODE.GAMES_UPDATED, (data) => {
-      setGames(data);
     });
 
     return () => {
@@ -120,43 +141,6 @@ const page = () => {
     };
   }, [
     socket,
-    tonWalletAddress,
-    userData.user?.firstName,
-    userData.user?.id,
-    userData.user?.photoUrl,
-  ]);
-
-  useEffect(() => {
-    if (socket.connected) {
-      setIsConnected(true);
-      const refetch = async () => {
-        //获取用户信息
-        const userResponse = await axios.post(
-          "http://localhost:8080/api/user/login",
-          {
-            userId: userData.user?.id,
-            username: userData.user?.firstName,
-            walletAddress: tonWalletAddress,
-            avatar: userData.user?.photoUrl,
-          },
-        );
-        if (userResponse.data) {
-          console.log(userResponse.data);
-          setUser(userResponse.data);
-        }
-
-        // 获取房间列表
-        const gamesResponse = await axios.get(
-          "http://localhost:8080/api/game/all",
-        );
-        if (gamesResponse.data) {
-          console.log("games:", gamesResponse.data);
-          setGames(gamesResponse.data.data);
-        }
-      };
-      refetch();
-    }
-  }, [
     socket.connected,
     tonWalletAddress,
     userData.user?.firstName,
@@ -164,51 +148,50 @@ const page = () => {
     userData.user?.photoUrl,
   ]);
 
+  const uniqueGames = useUniqueGames(games);
+
   if (!isConnected) {
-    return <div>Connecting...</div>;
+    return <div>连接中...</div>;
   }
 
   return (
     <div className="flex h-screen flex-col items-center justify-center space-y-6">
       <Button
-        onClick={() => {
-          onCreateGame();
-        }}
+        onClick={onCreateGame}
         className="absolute right-2 top-2 bg-white text-black"
       >
         创建一个游戏
       </Button>
       <div>
-        <h1>游戏房间: {games.length}</h1>
+        <h1>欢迎您:{user?.username}</h1>
+        <h1>balance:{user?.balance}</h1>
+        <h1>游戏房间: {uniqueGames.length}</h1>
         <div className="flex flex-col space-y-2">
-          {games.map((game: any) => (
-            <div key={game.gameName} className="flex flex-row space-x-2">
-              <span>{game.gameName}</span>
-              <span>
-                {game.players.length}/{game.maxPlayers}
-              </span>
-              {game.players.find(
-                (player: { playerId: number }) =>
-                  player.playerId === userData.user?.id,
-              ) ? (
-                <button
-                  onClick={() => {
-                    router.push(`/game/${game._id}`);
-                  }}
-                >
-                  Rejoin
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    joinGame(game._id);
-                  }}
-                >
-                  join
-                </button>
-              )}
-            </div>
-          ))}
+          {uniqueGames.map(
+            (game: {
+              gameName: string;
+              maxPlayers: number;
+              players: [];
+              gameId: string;
+            }) => (
+              <div key={game.gameId} className="flex flex-row space-x-2">
+                <span>{game.gameName}</span>
+                <span>
+                  {game.players.length}/{game.maxPlayers}
+                </span>
+                {game.players.find(
+                  (player: { playerId: number }) =>
+                    player.playerId === userData.user?.id,
+                ) ? (
+                  <button onClick={() => router.push(`/game/${game.gameId}`)}>
+                    Rejoin
+                  </button>
+                ) : (
+                  <button onClick={() => joinGame(game.gameId)}>join</button>
+                )}
+              </div>
+            ),
+          )}
         </div>
       </div>
     </div>

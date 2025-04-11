@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import Image from "next/image";
 import { CardType } from "@/types/CardType";
 import { Action } from "@/types/ActionStatus";
+import { GamePhase } from "@/types/GameTypes";
 
 interface IPlayer {
   playerId: string;
@@ -181,7 +182,7 @@ const RoomUI = ({
               key={card.suit + index}
               suit={card.suit}
               rank={card.rank}
-              faceDown={false}
+              gamePhase={GamePhase.Waiting}
             />
           ))}
         </div>

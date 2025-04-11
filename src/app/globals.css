@@ -71,7 +71,13 @@ body {
   }
 }
 
-
+/* globals.css */
+input[type="range"].slider-vertical {
+  writing-mode: bt-lr; /* vertical */
+  -webkit-appearance: slider-vertical;
+  width: 200px;
+  height: 20px;
+}
 
 @layer base {
   * {

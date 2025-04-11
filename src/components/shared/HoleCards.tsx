@@ -30,7 +30,6 @@ const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
         height="h-[3.8rem]"
         suit={holeCards?.[0]?.suit.toUpperCase() || ""}
         rank={holeCards?.[0]?.rank.toLocaleUpperCase() || ""}
-        faceDown={false}
       />
       <PokerCard
         classNames={`${tonWalletAddress === walletAddress ? "" : "rotate-[10deg]"}`}
@@ -38,7 +37,6 @@ const HoleCards = ({ tonWalletAddress, holeCards, actionStatus }: Props) => {
         height="h-[3.8rem]"
         suit={holeCards?.[1]?.suit.toLocaleUpperCase() || ""}
         rank={holeCards?.[1]?.rank.toLocaleUpperCase() || ""}
-        faceDown={false}
       />
     </div>
   );

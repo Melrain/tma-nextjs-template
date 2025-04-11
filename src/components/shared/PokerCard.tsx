@@ -4,6 +4,7 @@ import { GiPokerHand } from "react-icons/gi";
 import { RiPokerClubsFill, RiPokerSpadesFill } from "react-icons/ri";
 import { RiPokerDiamondsFill } from "react-icons/ri";
 import React from "react";
+import { GamePhase } from "@/types/GameTypes";
 
 type DeckCardProps = {
   suit: string;
@@ -11,6 +12,7 @@ type DeckCardProps = {
   width?: string;
   height?: string;
   classNames?: string;
+  gamePhase: GamePhase;
 };
 
 const DeckCard: React.FC<DeckCardProps> = ({
@@ -19,8 +21,19 @@ const DeckCard: React.FC<DeckCardProps> = ({
   width,
   height,
   classNames,
+  gamePhase,
 }) => {
-  const faceDown = suit === "empty" || rank === "empty";
+  // 如果 suit 或 rank 为空，则不渲染
+  // if (suit === "" || rank === "") {
+  //   return null;
+  // }
+
+  // 如果 suit 或 rank 为 'empty'，只渲染背面
+  const faceDown = suit === "UNAVAILABLE" || rank === "UNAVAILABLE";
+
+  if (gamePhase === GamePhase.Waiting || gamePhase === GamePhase.Ended) {
+    return null;
+  }
 
   const renderSuit = () => {
     switch (suit) {
