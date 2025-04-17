@@ -5,6 +5,10 @@ export interface IGame {
   players: IPlayer[]; // 当前游戏的所有玩家
   waitingList: IPlayer[]; // 等待加入的玩家
   pot: number; // 奖池金额
+  pots: {
+    amount: number;
+    eligiblePlayerIds: string[];
+  }[]; // 奖池列表
   dealerId: string; // 当前庄家玩家的ID
   currentPlayerId: string; // 当前轮到操作的玩家ID
   communityCards: CommunityCards; // 公共牌（翻牌、转牌、河牌）
@@ -42,7 +46,7 @@ export enum GamePhase {
   Ended, // 游戏结束阶段
 }
 export type Card = {
-  suit: "h" | "d" | "c" | "s" | "empty";
+  suit: "h" | "d" | "c" | "s" | "empty" | "unavailable"; // 花色 (红心, 方块, 梅花, 黑桃)
   rank:
     | "2"
     | "3"
@@ -57,6 +61,7 @@ export type Card = {
     | "Q"
     | "K"
     | "empty"
+    | "unavailable"
     | "A";
 };
 
@@ -83,13 +88,14 @@ export interface PlayerAction {
 }
 
 export enum ActionType {
-  Call, // 跟注
-  Raise, // 加注
-  Check, // 过牌
-  Fold, // 弃牌
-  AllIn, // 全押
-  Check_Fold, // 过牌弃牌
-  None, // 无操作
+  Call = 0,
+  Raise = 1,
+  Check = 2,
+  Fold = 3,
+  AllIn = 4,
+  Bet = 5, // ✅ 新增 Bet 操作
+  Check_Fold = 6,
+  None = 7,
 }
 
 export enum CODE {

@@ -2,19 +2,18 @@
 
 import React from "react";
 import Image from "next/image";
-import { CardType } from "@/types/CardType";
+
 import PokerCard from "../shared/PokerCard";
-import { GamePhase, PlayerAction, PlayerStatus } from "@/types/GameTypes";
+import { Card, GamePhase, PlayerAction, PlayerStatus } from "@/types/GameTypes";
 import { CircularCountdown } from "../Game/CountDownUI";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
-import ActionPanel from "./ActionPanel";
 
 interface PlayerUIProps {
   username: string;
   avatar: string;
   positionCss: string;
   index: number;
-  handCards: CardType[];
+  handCards: Card[];
   totalChips: number;
   bigBlind: number;
   currentAction: PlayerAction | null;
@@ -81,7 +80,7 @@ const PlayerUI = ({
         } text-black`}
       >
         <div
-          className={`absolute flex translate-x-2 flex-row ${index === 0 ? "bottom-1 right-2" : "-right-9 bottom-0"}`}
+          className={`absolute flex translate-x-2 flex-row space-x-1 ${index === 0 ? "-right-10 bottom-1" : "-right-9 bottom-0"}`}
         >
           {handCards.length > 0 &&
             handCards.map((card, cardIndex) => (
@@ -90,8 +89,8 @@ const PlayerUI = ({
                   gamePhase={gamePhase}
                   suit={card.suit.toUpperCase()}
                   rank={card.rank.toUpperCase()}
-                  width="w-[2.8rem]"
-                  height="h-[3.8rem]"
+                  width={`${index === 0 ? "w-[3.5rem]" : "w-[2.8rem]"}`}
+                  height={`${index === 0 ? "h-[4.9rem]" : "h-[3.92rem]"}`}
                   classNames={`${
                     index === 0
                       ? ""
@@ -135,21 +134,6 @@ const PlayerUI = ({
         </span>
         <span className="text-xs">{totalChips / bigBlind} BB</span>
       </div>
-      {/* Action Area */}
-
-      {/* {index === 0 && currentPlayerId.toString() === userId.toString() && (
-        <div className="">
-          <ActionPanel
-            currentMinBet={currentMinBet}
-            currentPlayerId={currentPlayerId}
-            gamePhase={gamePhase}
-            playerTotalChips={totalChips}
-            playerCurrentBet={playerCurrentBet}
-            playerStatus={playerStatus}
-            gameId={gameId}
-          />
-        </div>
-      )} */}
     </div>
   );
 };
@@ -166,7 +150,7 @@ const actionLabelPosition = [
 ];
 
 const dealerMarkPosition = [
-  "absolute -bottom-5 -right-5",
+  "absolute -top-5 -right-2",
   "absolute top-15 -right-10",
   "absolute top-15 -right-10",
   "absolute -bottom-15",

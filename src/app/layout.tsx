@@ -7,6 +7,9 @@ import { I18nProvider } from "@/core/i18n/provider";
 import "./globals.css";
 import "@telegram-apps/telegram-ui/dist/styles.css";
 import "normalize.css/normalize.css";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Your Application Title Goes Here",
@@ -18,7 +21,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
   return (
     <html lang={locale}>
-      <body className="overflow-hidden">
+      <body className={`overflow-hidden ${inter.className}`}>
         <I18nProvider>
           <Root>{children}</Root>
         </I18nProvider>

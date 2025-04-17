@@ -1,5 +1,5 @@
-export type CardType = {
-  suit: "h" | "d" | "c" | "s" | "empty";
+export type Card = {
+  suit: "h" | "d" | "c" | "s" | "empty" | "unavailable"; // 花色 (红心, 方块, 梅花, 黑桃)
   rank:
     | "2"
     | "3"
@@ -14,5 +14,6 @@ export type CardType = {
     | "Q"
     | "K"
     | "empty"
+    | "unavailable"
     | "A";
 };
