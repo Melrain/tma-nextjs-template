@@ -23,6 +23,8 @@ interface ActionPanelProps {
   playerStatus: PlayerStatus;
   availableActions: ActionType[];
   bigBlind: number;
+  currentMaxBet: number;
+  currentHighestChips: number;
 }
 
 const ActionPanel = ({
@@ -35,6 +37,8 @@ const ActionPanel = ({
   playerStatus,
   availableActions,
   bigBlind,
+  currentMaxBet,
+  currentHighestChips,
 }: ActionPanelProps) => {
   const userData = parseInitData(initData.raw());
   const userId = userData.user?.id || "";
@@ -45,12 +49,14 @@ const ActionPanel = ({
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   const isAllIn = playerTotalChips <= 0;
-  const callAmount = currentMinBet - playerCurrentBet;
+  // const callAmount = currentMinBet - playerCurrentBet;
+  const callAmount = Math.max(0, currentMaxBet - playerCurrentBet);
   const isAllInCall =
     availableActions.includes(ActionType.Call) && playerTotalChips < callAmount;
 
+  const alwaysAllowAllIn = playerTotalChips <= bigBlind * 10;
   const canShowAllIn =
-    availableActions.includes(ActionType.AllIn) &&
+    (availableActions.includes(ActionType.AllIn) || alwaysAllowAllIn) &&
     !availableActions.includes(ActionType.Raise);
 
   const minRaise = currentMinBet > 0 ? currentMinBet * 2 : bigBlind * 2;
@@ -71,7 +77,7 @@ const ActionPanel = ({
 
   useEffect(() => {
     setRaiseAmount(minRaise);
-  }, [currentMinBet]);
+  }, [currentMinBet, minRaise]);
 
   useEffect(() => {
     const handleTimer = (data: { playerId: string; seconds: number }) => {
@@ -149,7 +155,7 @@ const ActionPanel = ({
               <PopoverTrigger asChild>
                 <button
                   onClick={() => setPopoverOpen(true)}
-                  className="flex items-center justify-center rounded-xl bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+                  className="flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out"
                 >
                   ⬆️ Raise
                 </button>
@@ -162,16 +168,33 @@ const ActionPanel = ({
               >
                 <Slider
                   min={minRaise}
-                  max={playerTotalChips}
-                  step={bigBlind}
+                  max={
+                    playerTotalChips > currentHighestChips
+                      ? playerTotalChips
+                      : currentHighestChips
+                  }
+                  step={1} // 每 1 筹码为单位
                   value={[raiseAmount]}
                   onValueChange={(val) => setRaiseAmount(val[0])}
                 />
 
                 <div className="text-sm text-white">
                   Raise: <strong>{raiseAmount}</strong> (Min: {minRaise}, Max:{" "}
-                  {playerTotalChips})
+                  {playerTotalChips > currentHighestChips
+                    ? playerTotalChips
+                    : currentHighestChips}
+                  )
                 </div>
+
+                {/* 🟡 提示 All-In 状态 */}
+                {raiseAmount ===
+                  (playerTotalChips > currentHighestChips
+                    ? playerTotalChips
+                    : currentHighestChips) && (
+                  <div className="text-xs text-yellow-300">
+                    已达到最大加注，等效 All-In
+                  </div>
+                )}
 
                 <div className="flex flex-wrap justify-center gap-2">
                   {[1.5, 2, 3, 4].map((x) => {
@@ -182,18 +205,29 @@ const ActionPanel = ({
                       <button
                         key={x}
                         disabled={
-                          multiplied < minRaise || multiplied > playerTotalChips
+                          multiplied < minRaise ||
+                          multiplied >
+                            (playerTotalChips > currentHighestChips
+                              ? playerTotalChips
+                              : currentHighestChips)
                         }
                         title={
                           multiplied < minRaise
                             ? `Min raise is ${minRaise}`
-                            : multiplied > playerTotalChips
+                            : multiplied >
+                                (playerTotalChips > currentHighestChips
+                                  ? playerTotalChips
+                                  : currentHighestChips)
                               ? "Insufficient chips"
                               : ""
                         }
                         className={cn(
                           "rounded-md px-3 py-1 text-sm",
-                          multiplied < minRaise || multiplied > playerTotalChips
+                          multiplied < minRaise ||
+                            multiplied >
+                              (playerTotalChips > currentHighestChips
+                                ? playerTotalChips
+                                : currentHighestChips)
                             ? "cursor-not-allowed bg-gray-400 text-white"
                             : "bg-gray-600 text-white hover:bg-gray-700",
                         )}
@@ -215,12 +249,31 @@ const ActionPanel = ({
                   </Button>
                   <Button
                     disabled={
-                      raiseAmount < minRaise || raiseAmount > playerTotalChips
+                      raiseAmount < minRaise ||
+                      raiseAmount >
+                        (playerTotalChips > currentHighestChips
+                          ? playerTotalChips
+                          : currentHighestChips)
                     }
                     className="flex-1 text-white"
-                    onClick={() => onAction(ActionType.Raise, raiseAmount)}
+                    onClick={() => {
+                      const isAllIn =
+                        raiseAmount ===
+                        (playerTotalChips > currentHighestChips
+                          ? playerTotalChips
+                          : currentHighestChips);
+                      onAction(
+                        isAllIn ? ActionType.AllIn : ActionType.Raise,
+                        raiseAmount,
+                      );
+                    }}
                   >
-                    Confirm Raise
+                    {raiseAmount ===
+                    (playerTotalChips > currentHighestChips
+                      ? playerTotalChips
+                      : currentHighestChips)
+                      ? "ALL-IN"
+                      : "Confirm Raise"}
                   </Button>
                 </div>
               </PopoverContent>
@@ -229,10 +282,21 @@ const ActionPanel = ({
 
           {canShowAllIn && (
             <ActionButton
-              label={`ALL-IN ${playerTotalChips}`}
+              label={`ALL-IN ${
+                playerTotalChips > currentHighestChips
+                  ? playerTotalChips
+                  : currentHighestChips
+              }`}
               actionType={ActionType.AllIn}
               pulse
-              onClick={() => onAction(ActionType.AllIn, playerTotalChips)}
+              onClick={() =>
+                onAction(
+                  ActionType.AllIn,
+                  playerTotalChips > currentHighestChips
+                    ? playerTotalChips
+                    : currentHighestChips,
+                )
+              }
             />
           )}
         </div>
@@ -272,7 +336,7 @@ const ActionButton = ({
     <button
       onClick={handleClick}
       className={cn(
-        "flex min-w-[80px] flex-row items-center justify-center rounded-xl px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out",
+        "flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out",
         "border-2 border-black shadow-sm backdrop-blur-xl",
         "hover:scale-105 hover:opacity-90",
         pulse

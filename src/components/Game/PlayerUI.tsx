@@ -56,8 +56,8 @@ const PlayerUI = ({
     >
       <Image
         className="absolute -z-50 size-full rounded-full"
-        width={100}
-        height={100}
+        width={50}
+        height={50}
         src={avatar}
         alt={"avatar"}
       />
@@ -133,6 +133,7 @@ const PlayerUI = ({
           {username}
         </span>
         <span className="text-xs">{totalChips / bigBlind} BB</span>
+        <span>{playerStatus}</span>
       </div>
     </div>
   );

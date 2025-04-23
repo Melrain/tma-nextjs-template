@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSocket } from "@/components/Game/SocketContext";
-import { CODE, IGame, ActionType } from "@/types/GameTypes";
+import { CODE, IGame, ActionType, IPlayer } from "@/types/GameTypes";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { reorderPlayerList } from "@/utils/fn";
 import axios from "axios";
@@ -15,6 +15,8 @@ export const useGameSocket = (gameId: string) => {
   const [gameData, setGameData] = useState<IGame>();
   const [players, setPlayers] = useState<any[]>([]);
   const [availableActions, setAvailableActions] = useState<ActionType[]>([]);
+  const [currentMaxBet, setCurrentMaxBet] = useState(0);
+  const [currentHighestChips, setCurrentHighestChips] = useState(0);
   const router = useRouter();
 
   const onLeaveGame = async () => {
@@ -64,8 +66,19 @@ export const useGameSocket = (gameId: string) => {
         data.gameData.players,
         userData.user?.id || 0,
       );
+
       setPlayers(reOrderedPlayers);
       setGameData(data.gameData);
+      const maxBet = Math.max(...players.map((p) => p.bet));
+      const otherPlayers = players.filter(
+        (p: IPlayer) => p.playerId !== userId,
+      );
+      const highestChips =
+        otherPlayers.length > 0
+          ? Math.max(...otherPlayers.map((p) => p.totalChips))
+          : 0;
+      setCurrentMaxBet(maxBet);
+      setCurrentHighestChips(highestChips);
     };
 
     const handleAvailableActions = (data: {
@@ -107,7 +120,7 @@ export const useGameSocket = (gameId: string) => {
         CODE.AVAILABLE_ACTIONS + gameId + userId,
       );
     };
-  }, [gameId, socket, userData.user?.id]);
+  }, [gameId, players, socket, userData.user?.id]);
 
   return {
     isConnected,
@@ -117,5 +130,7 @@ export const useGameSocket = (gameId: string) => {
     onLeaveGame,
     onResetGame,
     availableActions,
+    currentMaxBet,
+    currentHighestChips,
   };
 };

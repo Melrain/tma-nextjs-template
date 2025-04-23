@@ -1,23 +1,27 @@
 export interface IGame {
   gameId: string; // 游戏的唯一标识符
-  gameName: string; // 游戏名称
-  gamePhase: GamePhase; // 当前游戏的阶段 (Waiting, Preflop, Flop, Turn, River, Showdown, Ended)
+  gameName: string;
+  gamePhase: GamePhase; // 当前游戏的阶段
   players: IPlayer[]; // 当前游戏的所有玩家
   waitingList: IPlayer[]; // 等待加入的玩家
-  pot: number; // 奖池金额
-  pots: {
+  mainPot: {
     amount: number;
     eligiblePlayerIds: string[];
-  }[]; // 奖池列表
+  }; // 主奖池
+  sidePots: {
+    amount: number;
+    eligiblePlayerIds: string[];
+  }[]; // 边池列表
+  deck: Card[]; // 手牌（52张牌）
+  maxPlayers: number; // 最大玩家数量
+  bigBlind: number; // 大盲注金额
   dealerId: string; // 当前庄家玩家的ID
+  currentMinBet: number; // 当前最小下注金额
   currentPlayerId: string; // 当前轮到操作的玩家ID
   communityCards: CommunityCards; // 公共牌（翻牌、转牌、河牌）
   actions: PlayerAction[]; // 记录所有玩家的操作
-  bigBlind: number; // 大盲注金额
-  currentMinBet: number; // 当前最小下注金额
-  lastRaiserId?: string; // 最后加注玩家的ID
+  lastRaiserId?: string; // 上一个加注的玩家ID
 }
-
 export interface IPlayer {
   playerId: string; // 玩家唯一标识符
   username: string; // 玩家用户名

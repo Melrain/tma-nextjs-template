@@ -29,6 +29,8 @@ const Page = () => {
     gameData,
     onLeaveGame,
     onResetGame,
+    currentMaxBet,
+    currentHighestChips,
   } = useGameSocket(gameId);
 
   if (!isConnected) {
@@ -102,6 +104,8 @@ const Page = () => {
           playerCurrentBet={players[0]?.bet || 0}
           playerStatus={players[0]?.status || 0}
           availableActions={availableActions}
+          currentMaxBet={currentMaxBet}
+          currentHighestChips={currentHighestChips}
         />
       </div>
 
@@ -125,10 +129,11 @@ const Page = () => {
         <div className="space-y-1 text-center text-sm text-white">
           <div className="text-lg font-bold tracking-wide">🃏 Poker Table</div>
           <div>bigBlind:{gameData?.bigBlind}</div>
-          <div>💰 Pot: {gameData?.pot}</div>
+          <div>💰 Pot: {gameData?.mainPot.amount}</div>
           <div>📌 Min Bet: {gameData?.currentMinBet}</div>
           <div>🎯 Current Player: {gameData?.currentPlayerId}</div>
           <div>📶 Phase: {gamePhaseText(gameData?.gamePhase)}</div>
+          <div>当前最高筹码:{currentHighestChips}</div>
         </div>
       </div>
     </div>
