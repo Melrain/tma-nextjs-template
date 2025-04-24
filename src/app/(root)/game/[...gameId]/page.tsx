@@ -95,17 +95,12 @@ const Page = () => {
 
       <div className="absolute bottom-5 left-1/2 flex -translate-x-[50%] items-center justify-center">
         <ActionPanel
-          bigBlind={gameData?.bigBlind || 1}
           gameId={gameId}
           currentPlayerId={gameData?.currentPlayerId || ""}
-          currentMinBet={gameData?.currentMinBet || 0}
           gamePhase={gameData?.gamePhase || 0}
-          playerTotalChips={players[0]?.totalChips || 0}
-          playerCurrentBet={players[0]?.bet || 0}
           playerStatus={players[0]?.status || 0}
           availableActions={availableActions}
-          currentMaxBet={currentMaxBet}
-          currentHighestChips={currentHighestChips}
+          playerTotalChips={players[0]?.totalChips || 0}
         />
       </div>
 

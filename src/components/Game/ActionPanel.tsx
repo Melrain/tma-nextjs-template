@@ -3,7 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useSocket } from "./SocketContext";
-import { ActionType, CODE, GamePhase, PlayerStatus } from "@/types/GameTypes";
+import {
+  PlayerAction,
+  ActionType,
+  CODE,
+  GamePhase,
+  PlayerStatus,
+} from "@/types/GameTypes";
 import {
   Popover,
   PopoverContent,
@@ -16,51 +22,27 @@ import { cn } from "@/lib/utils";
 interface ActionPanelProps {
   gameId: string;
   currentPlayerId: string;
-  currentMinBet: number;
   gamePhase: GamePhase;
   playerTotalChips: number;
-  playerCurrentBet: number;
   playerStatus: PlayerStatus;
-  availableActions: ActionType[];
-  bigBlind: number;
-  currentMaxBet: number;
-  currentHighestChips: number;
+  availableActions: PlayerAction[];
 }
 
 const ActionPanel = ({
   gameId,
   currentPlayerId,
-  currentMinBet,
   gamePhase,
   playerTotalChips,
-  playerCurrentBet,
   playerStatus,
   availableActions,
-  bigBlind,
-  currentMaxBet,
-  currentHighestChips,
 }: ActionPanelProps) => {
   const userData = parseInitData(initData.raw());
   const userId = userData.user?.id || "";
   const socket = useSocket();
 
   const [isActed, setIsActed] = useState(false);
-  const [raiseAmount, setRaiseAmount] = useState(bigBlind * 2);
+  const [raiseAmount, setRaiseAmount] = useState(0);
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const isAllIn = playerTotalChips <= 0;
-  // const callAmount = currentMinBet - playerCurrentBet;
-  const callAmount = Math.max(0, currentMaxBet - playerCurrentBet);
-  const isAllInCall =
-    availableActions.includes(ActionType.Call) && playerTotalChips < callAmount;
-
-  const alwaysAllowAllIn = playerTotalChips <= bigBlind * 10;
-  const canShowAllIn =
-    (availableActions.includes(ActionType.AllIn) || alwaysAllowAllIn) &&
-    !availableActions.includes(ActionType.Raise);
-
-  const minRaise = currentMinBet > 0 ? currentMinBet * 2 : bigBlind * 2;
-  const canRaise = playerTotalChips >= minRaise;
 
   const onAction = (action: ActionType, amount: number = 0) => {
     socket.emit(CODE.PLAYER_ACTION, {
@@ -74,10 +56,6 @@ const ActionPanel = ({
     setIsActed(true);
     setPopoverOpen(false);
   };
-
-  useEffect(() => {
-    setRaiseAmount(minRaise);
-  }, [currentMinBet, minRaise]);
 
   useEffect(() => {
     const handleTimer = (data: { playerId: string; seconds: number }) => {
@@ -95,210 +73,110 @@ const ActionPanel = ({
     currentPlayerId !== userId ||
     gamePhase === GamePhase.Waiting ||
     gamePhase === GamePhase.Ended ||
-    gamePhase === GamePhase.Showdown
+    gamePhase === GamePhase.Showdown ||
+    playerStatus === PlayerStatus.AllIn
   ) {
     return null;
   }
 
   return (
     <div className="flex w-full flex-col items-center gap-2">
-      {isAllIn ? (
-        <div className="text-sm text-yellow-300">您已全押，等待结果...</div>
-      ) : isActed ? (
+      {isActed ? (
         <div className="text-sm text-white">您已操作，等待其他玩家...</div>
       ) : (
         <div className="flex flex-row justify-center gap-2">
-          {availableActions.includes(ActionType.Fold) && (
-            <ActionButton
-              label="FOLD"
-              actionType={ActionType.Fold}
-              onClick={() => onAction(ActionType.Fold)}
-            />
-          )}
-
-          {availableActions.includes(ActionType.Check) && (
-            <ActionButton
-              label="CHECK"
-              actionType={ActionType.Check}
-              onClick={() => onAction(ActionType.Check)}
-            />
-          )}
-
-          {availableActions.includes(ActionType.Bet) && (
-            <ActionButton
-              label={`BET ${currentMinBet}`}
-              actionType={ActionType.Bet}
-              onClick={() => onAction(ActionType.Bet, currentMinBet)}
-            />
-          )}
-
-          {availableActions.includes(ActionType.Call) && (
-            <ActionButton
-              label={
-                isAllInCall
-                  ? `ALL-IN ${playerTotalChips}`
-                  : `CALL ${callAmount}`
-              }
-              pulse={isAllInCall}
-              actionType={ActionType.Call}
-              onClick={() =>
-                onAction(
-                  ActionType.Call,
-                  isAllInCall ? playerTotalChips : callAmount,
-                )
-              }
-            />
-          )}
-
-          {availableActions.includes(ActionType.Raise) && !isAllIn && (
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  onClick={() => setPopoverOpen(true)}
-                  className="flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out"
+          {availableActions.map((action) => {
+            // 🟡 处理 Raise 和 Bet（带滑动条）
+            if (
+              action.type === ActionType.Raise ||
+              action.type === ActionType.Bet
+            ) {
+              return (
+                <Popover
+                  key={action.type}
+                  open={popoverOpen}
+                  onOpenChange={setPopoverOpen}
                 >
-                  ⬆️ Raise
-                </button>
-              </PopoverTrigger>
+                  <PopoverTrigger asChild>
+                    <button
+                      onClick={() => setPopoverOpen(true)}
+                      className="flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out"
+                    >
+                      {action.type === ActionType.Raise ? "⬆️ Raise" : "💰 Bet"}
+                    </button>
+                  </PopoverTrigger>
 
-              <PopoverContent
-                side="top"
-                align="center"
-                className="z-50 flex w-[90vw] max-w-xs flex-col items-center space-y-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md"
-              >
-                <Slider
-                  min={minRaise}
-                  max={
-                    playerTotalChips < currentHighestChips
-                      ? playerTotalChips
-                      : currentHighestChips
-                  }
-                  step={1} // 每 1 筹码为单位
-                  value={[raiseAmount]}
-                  onValueChange={(val) => setRaiseAmount(val[0])}
-                />
-
-                <div className="text-sm text-white">
-                  Raise: <strong>{raiseAmount}</strong> (Min: {minRaise}, Max:{" "}
-                  {playerTotalChips < currentHighestChips
-                    ? playerTotalChips
-                    : currentHighestChips}
-                  )
-                </div>
-
-                {/* 🟡 提示 All-In 状态 */}
-                {raiseAmount ===
-                  (playerTotalChips < currentHighestChips
-                    ? playerTotalChips
-                    : currentHighestChips) && (
-                  <div className="text-xs text-yellow-300">
-                    已达到最大加注，等效 All-In
-                  </div>
-                )}
-
-                <div className="flex flex-wrap justify-center gap-2">
-                  {[1.5, 2, 3, 4].map((x) => {
-                    const multiplied = Math.floor(
-                      (currentMinBet > 0 ? currentMinBet : bigBlind) * x,
-                    );
-                    return (
-                      <button
-                        key={x}
-                        disabled={
-                          multiplied < minRaise ||
-                          multiplied >
-                            (playerTotalChips < currentHighestChips
-                              ? playerTotalChips
-                              : currentHighestChips)
-                        }
-                        title={
-                          multiplied < minRaise
-                            ? `Min raise is ${minRaise}`
-                            : multiplied >
-                                (playerTotalChips < currentHighestChips
-                                  ? playerTotalChips
-                                  : currentHighestChips)
-                              ? "Insufficient chips"
-                              : ""
-                        }
-                        className={cn(
-                          "rounded-md px-3 py-1 text-sm",
-                          multiplied < minRaise ||
-                            multiplied >
-                              (playerTotalChips < currentHighestChips
-                                ? playerTotalChips
-                                : currentHighestChips)
-                            ? "cursor-not-allowed bg-gray-400 text-white"
-                            : "bg-gray-600 text-white hover:bg-gray-700",
-                        )}
-                        onClick={() => setRaiseAmount(multiplied)}
+                  <PopoverContent className="z-50 flex w-[90vw] max-w-xs flex-col items-center space-y-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md">
+                    <Slider
+                      min={action.minAmount ?? 0}
+                      max={action.maxAmount ?? 0}
+                      value={[raiseAmount]}
+                      step={1}
+                      onValueChange={(val) => setRaiseAmount(val[0])}
+                    />
+                    <div className="text-sm text-white">
+                      {ActionType[action.type]}: <strong>{raiseAmount}</strong>{" "}
+                      (Min: {action.minAmount}, Max: {action.maxAmount})
+                    </div>
+                    <div className="flex w-full justify-between gap-4">
+                      <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => setPopoverOpen(false)}
                       >
-                        {x}X
-                      </button>
-                    );
-                  })}
-                </div>
+                        Cancel
+                      </Button>
+                      <Button
+                        disabled={
+                          raiseAmount < (action.minAmount ?? 0) ||
+                          raiseAmount > (action.maxAmount ?? 0)
+                        }
+                        className="flex-1 text-white"
+                        onClick={() => {
+                          const isAllIn =
+                            raiseAmount === (action.maxAmount ?? 0);
+                          onAction(
+                            isAllIn ? ActionType.AllIn : action.type,
+                            raiseAmount,
+                          );
+                        }}
+                      >
+                        {raiseAmount === (action.maxAmount ?? 0)
+                          ? "ALL-IN"
+                          : "Confirm"}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              );
+            }
 
-                <div className="flex w-full justify-between gap-4">
-                  <Button
-                    variant="secondary"
-                    className="flex-1"
-                    onClick={() => setPopoverOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={
-                      raiseAmount < minRaise ||
-                      raiseAmount >
-                        (playerTotalChips < currentHighestChips
-                          ? playerTotalChips
-                          : currentHighestChips)
-                    }
-                    className="flex-1 text-white"
-                    onClick={() => {
-                      const isAllIn =
-                        raiseAmount ===
-                        (playerTotalChips < currentHighestChips
-                          ? playerTotalChips
-                          : currentHighestChips);
-                      onAction(
-                        isAllIn ? ActionType.AllIn : ActionType.Raise,
-                        raiseAmount,
-                      );
-                    }}
-                  >
-                    {raiseAmount ===
-                    (playerTotalChips < currentHighestChips
-                      ? playerTotalChips
-                      : currentHighestChips)
-                      ? "ALL-IN"
-                      : "Confirm Raise"}
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          )}
+            // 🟡 特殊情况：Call 被 All-In 替代
+            const isAllInCall =
+              action.type === ActionType.Call &&
+              action.amount &&
+              action.amount >= playerTotalChips;
+            const displayType = isAllInCall ? ActionType.AllIn : action.type;
+            const label = isAllInCall
+              ? `ALL-IN ${action.amount}`
+              : action.amount
+                ? `${ActionType[action.type]} ${action.amount}`
+                : ActionType[action.type];
 
-          {canShowAllIn && (
-            <ActionButton
-              label={`ALL-IN ${
-                playerTotalChips < currentHighestChips
-                  ? playerTotalChips
-                  : currentHighestChips
-              }`}
-              actionType={ActionType.AllIn}
-              pulse
-              onClick={() =>
-                onAction(
-                  ActionType.AllIn,
-                  playerTotalChips < currentHighestChips
-                    ? playerTotalChips
-                    : currentHighestChips,
-                )
-              }
-            />
-          )}
+            if (action.type === ActionType.AllIn && !isAllInCall) {
+              return null; // 🚫 平时隐藏独立 AllIn 按钮（已在 Raise 中体现）
+            }
+
+            return (
+              <ActionButton
+                key={action.type}
+                label={label}
+                actionType={displayType}
+                pulse={displayType === ActionType.AllIn}
+                onClick={() => onAction(displayType, action.amount ?? 0)}
+              />
+            );
+          })}
         </div>
       )}
     </div>

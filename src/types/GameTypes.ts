@@ -73,6 +73,7 @@ export enum PlayerStatus {
   Waiting, // 等待阶段
   InGame, // 在游戏中
   Folded, // 弃牌
+  AllIn, // 全押
 }
 
 export enum PreAction {
@@ -87,19 +88,21 @@ export interface IRoom {
   logs: string[]; // 游戏历史记录
 }
 export interface PlayerAction {
-  type: ActionType; // 玩家操作类型 (Call, Raise, Check, Fold等)
-  amount: number; // 对应的下注金额（例如：Raise 的金额）
+  type: ActionType;
+  amount?: number; // 默认金额（可用于按钮默认展示）
+  minAmount?: number; // 支持范围：用于 Raise / Bet 滑动条
+  maxAmount?: number;
 }
 
 export enum ActionType {
-  Call = 0,
-  Raise = 1,
-  Check = 2,
-  Fold = 3,
-  AllIn = 4,
-  Bet = 5, // ✅ 新增 Bet 操作
-  Check_Fold = 6,
-  None = 7,
+  Fold = 0,
+  Check = 1,
+  Call = 2,
+  Raise = 3,
+  Bet = 4,
+  AllIn = 5, // 明确的 All-In（可能是主动加注，也可能是兜底行为）
+  CallAllIn = 6, // 筹码不足时尽力 Call 的 All-In（partial call）
+  RaiseAllIn = 7, // 筹码等于最小加注时的 All-In（等价 Raise）
 }
 
 export enum CODE {
