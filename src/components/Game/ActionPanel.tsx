@@ -169,7 +169,7 @@ const ActionPanel = ({
                 <Slider
                   min={minRaise}
                   max={
-                    playerTotalChips > currentHighestChips
+                    playerTotalChips < currentHighestChips
                       ? playerTotalChips
                       : currentHighestChips
                   }
@@ -180,7 +180,7 @@ const ActionPanel = ({
 
                 <div className="text-sm text-white">
                   Raise: <strong>{raiseAmount}</strong> (Min: {minRaise}, Max:{" "}
-                  {playerTotalChips > currentHighestChips
+                  {playerTotalChips < currentHighestChips
                     ? playerTotalChips
                     : currentHighestChips}
                   )
@@ -188,7 +188,7 @@ const ActionPanel = ({
 
                 {/* 🟡 提示 All-In 状态 */}
                 {raiseAmount ===
-                  (playerTotalChips > currentHighestChips
+                  (playerTotalChips < currentHighestChips
                     ? playerTotalChips
                     : currentHighestChips) && (
                   <div className="text-xs text-yellow-300">
@@ -207,7 +207,7 @@ const ActionPanel = ({
                         disabled={
                           multiplied < minRaise ||
                           multiplied >
-                            (playerTotalChips > currentHighestChips
+                            (playerTotalChips < currentHighestChips
                               ? playerTotalChips
                               : currentHighestChips)
                         }
@@ -215,7 +215,7 @@ const ActionPanel = ({
                           multiplied < minRaise
                             ? `Min raise is ${minRaise}`
                             : multiplied >
-                                (playerTotalChips > currentHighestChips
+                                (playerTotalChips < currentHighestChips
                                   ? playerTotalChips
                                   : currentHighestChips)
                               ? "Insufficient chips"
@@ -225,7 +225,7 @@ const ActionPanel = ({
                           "rounded-md px-3 py-1 text-sm",
                           multiplied < minRaise ||
                             multiplied >
-                              (playerTotalChips > currentHighestChips
+                              (playerTotalChips < currentHighestChips
                                 ? playerTotalChips
                                 : currentHighestChips)
                             ? "cursor-not-allowed bg-gray-400 text-white"
@@ -251,7 +251,7 @@ const ActionPanel = ({
                     disabled={
                       raiseAmount < minRaise ||
                       raiseAmount >
-                        (playerTotalChips > currentHighestChips
+                        (playerTotalChips < currentHighestChips
                           ? playerTotalChips
                           : currentHighestChips)
                     }
@@ -259,7 +259,7 @@ const ActionPanel = ({
                     onClick={() => {
                       const isAllIn =
                         raiseAmount ===
-                        (playerTotalChips > currentHighestChips
+                        (playerTotalChips < currentHighestChips
                           ? playerTotalChips
                           : currentHighestChips);
                       onAction(
@@ -269,7 +269,7 @@ const ActionPanel = ({
                     }}
                   >
                     {raiseAmount ===
-                    (playerTotalChips > currentHighestChips
+                    (playerTotalChips < currentHighestChips
                       ? playerTotalChips
                       : currentHighestChips)
                       ? "ALL-IN"
@@ -283,7 +283,7 @@ const ActionPanel = ({
           {canShowAllIn && (
             <ActionButton
               label={`ALL-IN ${
-                playerTotalChips > currentHighestChips
+                playerTotalChips < currentHighestChips
                   ? playerTotalChips
                   : currentHighestChips
               }`}
@@ -292,7 +292,7 @@ const ActionPanel = ({
               onClick={() =>
                 onAction(
                   ActionType.AllIn,
-                  playerTotalChips > currentHighestChips
+                  playerTotalChips < currentHighestChips
                     ? playerTotalChips
                     : currentHighestChips,
                 )

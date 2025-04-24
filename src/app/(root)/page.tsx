@@ -5,6 +5,7 @@ import { useSocket } from "@/components/Game/SocketContext";
 import { Button } from "@/components/ui/button";
 import { CODE, GamePhase } from "@/types/GameTypes";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
+import { Input } from "@telegram-apps/telegram-ui";
 import { useTonAddress } from "@tonconnect/ui-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -74,7 +75,7 @@ const page = () => {
     }
   };
 
-  const joinGame = async (gameId: string) => {
+  const joinGame = async (gameId: string, buyInAmount: number) => {
     try {
       const response = await axios.post(
         "http://localhost:8080/api/game/join-game",
@@ -82,7 +83,7 @@ const page = () => {
           gameId: gameId,
           username: userData.user?.firstName,
           playerId: userData.user?.id,
-          buyInAmount: 100,
+          buyInAmount: buyInAmount,
           avatar: userData.user?.photoUrl,
         },
       );
@@ -193,7 +194,17 @@ const page = () => {
                     Rejoin
                   </button>
                 ) : (
-                  <button onClick={() => joinGame(game.gameId)}>join</button>
+                  <div className="flex flex-col">
+                    <Input
+                      onChange={(e) => {
+                        setBuyInAmount(+e.target.value);
+                      }}
+                    />
+
+                    <button onClick={() => joinGame(game.gameId, buyInAmount)}>
+                      join
+                    </button>
+                  </div>
                 )}
               </div>
             ),
