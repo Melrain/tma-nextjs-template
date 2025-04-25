@@ -47,10 +47,7 @@ const ActionPanel = ({
   const onAction = (action: ActionType, amount: number = 0) => {
     socket.emit(CODE.PLAYER_ACTION, {
       gameId,
-      action: {
-        type: action,
-        amount,
-      },
+      action: { type: action, amount },
       playerId: userId,
     });
     setIsActed(true);
@@ -86,14 +83,26 @@ const ActionPanel = ({
       ) : (
         <div className="flex flex-row justify-center gap-2">
           {availableActions.map((action) => {
-            // 🟡 处理 Raise 和 Bet（带滑动条）
-            if (
-              action.type === ActionType.Raise ||
-              action.type === ActionType.Bet
-            ) {
+            const { type, amount = 0, minAmount = 0, maxAmount = 0 } = action;
+
+            const isRaiseType =
+              type === ActionType.Raise || type === ActionType.Bet;
+            const isAllInFallback = type === ActionType.AllIn;
+
+            const isRedundantAllIn =
+              isAllInFallback &&
+              availableActions.some(
+                (a) =>
+                  (a.type === ActionType.Raise || a.type === ActionType.Bet) &&
+                  a.maxAmount === playerTotalChips,
+              );
+
+            if (isRedundantAllIn) return null;
+
+            if (isRaiseType) {
               return (
                 <Popover
-                  key={action.type}
+                  key={`${type}-${minAmount}-${maxAmount}`}
                   open={popoverOpen}
                   onOpenChange={setPopoverOpen}
                 >
@@ -102,21 +111,21 @@ const ActionPanel = ({
                       onClick={() => setPopoverOpen(true)}
                       className="flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out"
                     >
-                      {action.type === ActionType.Raise ? "⬆️ Raise" : "💰 Bet"}
+                      {type === ActionType.Raise ? "⬆️ Raise" : "💰 Bet"}
                     </button>
                   </PopoverTrigger>
 
                   <PopoverContent className="z-50 flex w-[90vw] max-w-xs flex-col items-center space-y-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md">
                     <Slider
-                      min={action.minAmount ?? 0}
-                      max={action.maxAmount ?? 0}
+                      min={minAmount}
+                      max={maxAmount}
                       value={[raiseAmount]}
                       step={1}
                       onValueChange={(val) => setRaiseAmount(val[0])}
                     />
                     <div className="text-sm text-white">
-                      {ActionType[action.type]}: <strong>{raiseAmount}</strong>{" "}
-                      (Min: {action.minAmount}, Max: {action.maxAmount})
+                      {ActionType[type]}: <strong>{raiseAmount}</strong> (Min:{" "}
+                      {minAmount}, Max: {maxAmount})
                     </div>
                     <div className="flex w-full justify-between gap-4">
                       <Button
@@ -128,22 +137,18 @@ const ActionPanel = ({
                       </Button>
                       <Button
                         disabled={
-                          raiseAmount < (action.minAmount ?? 0) ||
-                          raiseAmount > (action.maxAmount ?? 0)
+                          raiseAmount < minAmount || raiseAmount > maxAmount
                         }
                         className="flex-1 text-white"
                         onClick={() => {
-                          const isAllIn =
-                            raiseAmount === (action.maxAmount ?? 0);
+                          const isAllIn = raiseAmount === maxAmount;
                           onAction(
-                            isAllIn ? ActionType.AllIn : action.type,
+                            isAllIn ? ActionType.AllIn : type,
                             raiseAmount,
                           );
                         }}
                       >
-                        {raiseAmount === (action.maxAmount ?? 0)
-                          ? "ALL-IN"
-                          : "Confirm"}
+                        {raiseAmount === maxAmount ? "ALL-IN" : "Confirm"}
                       </Button>
                     </div>
                   </PopoverContent>
@@ -151,29 +156,27 @@ const ActionPanel = ({
               );
             }
 
-            // 🟡 特殊情况：Call 被 All-In 替代
-            const isAllInCall =
-              action.type === ActionType.Call &&
-              action.amount &&
-              action.amount >= playerTotalChips;
-            const displayType = isAllInCall ? ActionType.AllIn : action.type;
-            const label = isAllInCall
-              ? `ALL-IN ${action.amount}`
-              : action.amount
-                ? `${ActionType[action.type]} ${action.amount}`
-                : ActionType[action.type];
+            const labelMap: Partial<Record<ActionType, string>> = {
+              [ActionType.Fold]: "Fold",
+              [ActionType.Check]: "Check",
+              [ActionType.Call]: `Call ${amount}`,
+              [ActionType.CallAllIn]: `ALL-IN (Call) ${amount}`,
+              [ActionType.RaiseAllIn]: `ALL-IN (Raise) ${amount}`,
+              [ActionType.AllIn]: `ALL-IN ${amount}`,
+            };
 
-            if (action.type === ActionType.AllIn && !isAllInCall) {
-              return null; // 🚫 平时隐藏独立 AllIn 按钮（已在 Raise 中体现）
-            }
+            const pulse =
+              type === ActionType.AllIn ||
+              type === ActionType.CallAllIn ||
+              type === ActionType.RaiseAllIn;
 
             return (
               <ActionButton
-                key={action.type}
-                label={label}
-                actionType={displayType}
-                pulse={displayType === ActionType.AllIn}
-                onClick={() => onAction(displayType, action.amount ?? 0)}
+                key={`${type}-${amount}`}
+                label={labelMap[type] || ActionType[type]}
+                actionType={type}
+                pulse={pulse}
+                onClick={() => onAction(type, amount)}
               />
             );
           })}
@@ -201,7 +204,9 @@ const ActionButton = ({
     [ActionType.Check]: "✅",
     [ActionType.Bet]: "💰",
     [ActionType.Call]: "📞",
+    [ActionType.CallAllIn]: "📞💥",
     [ActionType.Raise]: "⬆️",
+    [ActionType.RaiseAllIn]: "⬆️💥",
     [ActionType.AllIn]: "💥",
   };
 

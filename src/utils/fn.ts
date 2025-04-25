@@ -1,4 +1,4 @@
-import { ActionType, PlayerStatus } from "@/types/GameTypes";
+import { ActionType, IGame, IPlayer, PlayerStatus } from "@/types/GameTypes";
 
 export const reorderPlayerList = (players: any[], localPlayerId: number) => {
   // 找到本地玩家的索引
@@ -112,4 +112,17 @@ export function getAvailableActionsFrontend(
   }
 
   return actions;
+}
+
+export function getMaxLegalAllInAmount(player: IPlayer, game: IGame): number {
+  const maxBet = Math.max(...game.players.map((p) => p.bet));
+  const callAmount = Math.max(0, maxBet - player.bet);
+  const otherPlayers = game.players.filter(
+    (p) =>
+      p.playerId !== player.playerId &&
+      (p.status === PlayerStatus.InGame || p.status === PlayerStatus.AllIn),
+  );
+
+  const maxOtherStack = Math.max(...otherPlayers.map((p) => p.totalChips), 0);
+  return Math.min(player.totalChips, callAmount + maxOtherStack);
 }
