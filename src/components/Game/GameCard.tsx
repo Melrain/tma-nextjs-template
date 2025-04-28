@@ -77,9 +77,7 @@ export const GameCard = ({
       {/* 中间：房间信息 */}
       <div className="mt-4 space-y-1 text-sm text-gray-300">
         <p>🏷️ 房间 ID: {gameId}</p>
-        <p>
-          💰 大盲: {bigBlind} / 小盲: {Math.floor(bigBlind / 2)}
-        </p>
+        <p>💰 大盲: {bigBlind}</p>
         <p>🪙 最低买入: {minBuyIn}</p>
       </div>
 

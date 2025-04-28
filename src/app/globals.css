@@ -71,6 +71,15 @@ body {
   }
 }
 
+@layer utilities {
+  .bg-noise {
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjxmaWx0ZXIgaWQ9ImEiPjxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjAuMiIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbHRlcj0idXJsKCNhKSIvPjwvc3ZnPg==");
+    background-repeat: repeat;
+    background-size: 100px 100px;
+    opacity: 0.8;
+  }
+}
+
 /* globals.css */
 input[type="range"].slider-vertical {
   writing-mode: bt-lr; /* vertical */

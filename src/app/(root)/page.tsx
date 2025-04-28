@@ -20,7 +20,7 @@ export default function LobbyPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col space-y-6 bg-gradient-to-b from-gray-900 via-gray-800 to-black p-6 py-10">
+    <div className="flex min-h-screen w-full flex-col space-y-6 bg-gradient-to-b from-emerald-950 via-gray-900 to-black p-6 py-10">
       {/* 顶部栏 */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
