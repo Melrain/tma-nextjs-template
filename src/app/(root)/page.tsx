@@ -1,219 +1,79 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
-import { useSocket } from "@/components/Game/SocketContext";
+import React, { useState } from "react";
+import { useLobbyData } from "@/hooks/useLobbyData";
+import { useLobbySocket } from "@/hooks/useLobbySocket";
 import { Button } from "@/components/ui/button";
-import { CODE, GamePhase } from "@/types/GameTypes";
-import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { Input } from "@telegram-apps/telegram-ui";
-import { useTonAddress } from "@tonconnect/ui-react";
-import axios from "axios";
+import { GameCard } from "@/components/Game/GameCard";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { IPlayer } from "@/types/GameTypes";
 
-interface IPlayer {}
-interface IPokerRoom {
-  _id: string;
-  roomName: string;
-  players: IPlayer[];
-}
-
-function useUniqueGames(games: any[] | undefined | null) {
-  if (!Array.isArray(games)) return [];
-  return Array.from(new Map(games.map((g) => [g.gameId, g])).values());
-}
-
-const page = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [games, setGames] = useState([]);
-  const [user, setUser] = useState<{
-    username: string;
-    balance: number;
-  } | null>(null);
-  const socket = useSocket();
-  const userData = parseInitData(initData.raw());
-  const tonWalletAddress = useTonAddress();
+const LobbyPage = () => {
+  const { user, games, createGame, joinGame } = useLobbyData();
+  const { isConnected } = useLobbySocket();
   const [buyInAmount, setBuyInAmount] = useState(100);
-
   const router = useRouter();
 
-  const onCreateGame = async () => {
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/api/game/create",
-        {
-          userId: userData.user?.id,
-          createGameDto: {
-            gameId: userData.user?.id,
-            gameName: `${userData.user?.firstName}的游戏`,
-            gamePhase: GamePhase.Waiting,
-            players: [],
-            maxPlayers: 6,
-            waitingList: [],
-            bigBlind: 1,
-            mainPot: {
-              amount: 0,
-              eligiblePlayerIds: [],
-            },
-            lastRoundActions: [],
-            autoProceed: false,
-            sidePots: [],
-            currentMinBet: 0,
-            dealerId: "",
-            currentPlayerId: "",
-            communityCards: {
-              flop: [],
-              turn: null,
-              river: null,
-            },
-            actions: [],
-          },
-        },
-      );
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const joinGame = async (gameId: string, buyInAmount: number) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/api/game/join-game",
-        {
-          gameId: gameId,
-          username: userData.user?.firstName,
-          playerId: userData.user?.id,
-          buyInAmount: buyInAmount,
-          avatar: userData.user?.photoUrl,
-        },
-      );
-      if (response) {
-        router.push(`/game/${gameId}`);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const createUserResponse = await axios.post(
-          "http://localhost:8080/api/user/login",
-          {
-            userId: userData.user?.id,
-            username: userData.user?.firstName,
-            walletAddress: tonWalletAddress,
-            avatar: userData.user?.photoUrl,
-          },
-        );
-        if (createUserResponse.data) {
-          setUser(createUserResponse.data);
-        }
-
-        const gamesResponse = await axios.get(
-          "http://localhost:8080/api/game/all",
-        );
-        if (gamesResponse.data) {
-          setGames(gamesResponse.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-
-    setIsConnected(socket.connected);
-
-    socket.on("connect", async () => {});
-
-    socket.on("disconnect", () => {
-      console.log("disconnected");
-    });
-
-    socket.on(CODE.REDIS_TOUCH, async () => {
-      const gamesResponse = await axios.get(
-        "http://localhost:8080/api/game/all",
-      );
-      if (gamesResponse.data) {
-        setGames(gamesResponse.data.data);
-      }
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off(CODE.GAMES_UPDATED);
-    };
-  }, [
-    socket,
-    socket.connected,
-    tonWalletAddress,
-    userData.user?.firstName,
-    userData.user?.id,
-    userData.user?.photoUrl,
-  ]);
-
-  const uniqueGames = useUniqueGames(games);
-
   if (!isConnected) {
-    return <div>连接中...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-gray-500">连接服务器中...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center space-y-6">
+    <div className="flex min-h-screen w-full flex-col items-center space-y-6 bg-gray-100 px-4 py-8">
       <Button
-        onClick={onCreateGame}
-        className="absolute right-2 top-2 bg-white text-black"
+        onClick={createGame}
+        className="absolute right-6 top-6 bg-gradient-to-r from-pink-500 to-yellow-500 text-white"
       >
-        创建一个游戏
+        创建一个新游戏
       </Button>
-      <div>
-        <h1>欢迎您:{user?.username}</h1>
-        <h1>balance:{user?.balance}</h1>
-        <h1>游戏房间: {uniqueGames.length}</h1>
-        <div className="flex flex-col space-y-2">
-          {uniqueGames.map(
-            (game: {
-              gameName: string;
-              maxPlayers: number;
-              players: [];
-              gameId: string;
-            }) => (
-              <div key={game.gameId} className="flex flex-row space-x-2">
-                <span>{game.gameName}</span>
-                <span>
-                  {game.players.length}/{game.maxPlayers}
-                </span>
-                {game.players.find(
-                  (player: { playerId: number }) =>
-                    player.playerId === userData.user?.id,
-                ) ? (
-                  <button onClick={() => router.push(`/game/${game.gameId}`)}>
-                    Rejoin
-                  </button>
-                ) : (
-                  <div className="flex flex-col">
-                    <Input
-                      onChange={(e) => {
-                        setBuyInAmount(+e.target.value);
-                      }}
-                    />
-
-                    <button onClick={() => joinGame(game.gameId, buyInAmount)}>
-                      join
-                    </button>
-                  </div>
-                )}
-              </div>
-            ),
-          )}
-        </div>
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-bold text-gray-800">
+          欢迎, {user?.username}
+        </h1>
+        <p className="text-gray-600">余额：{user?.balance}</p>
       </div>
+      {games.length === 0 ? (
+        <div className="mt-10 text-gray-400">
+          暂无游戏房间，快来创建一个吧！
+        </div>
+      ) : (
+        <div className="grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
+          {games.map((game) => {
+            const isJoined = game.players.some(
+              (p: IPlayer) => p.playerId === user?.userId,
+            );
+
+            return (
+              <GameCard
+                key={game.gameId}
+                gameName={game.gameName}
+                gameId={game.gameId}
+                players={game.players}
+                maxPlayers={game.maxPlayers}
+                isJoined={isJoined}
+                onJoin={() => joinGame(game.gameId, buyInAmount)}
+                onRejoin={() => router.push(`/game/${game.gameId}`)}
+              />
+            );
+          })}
+        </div>
+      )}
+      {/* 买入金额输入框
+      <div className="fixed bottom-6 left-6">
+        <Input
+          type="number"
+          value={buyInAmount}
+          onChange={(e) => setBuyInAmount(Number(e.target.value))}
+          placeholder="买入金额"
+        />
+      </div> */}
     </div>
   );
 };
 
-export default page;
+export default LobbyPage;
