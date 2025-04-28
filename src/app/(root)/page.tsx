@@ -18,7 +18,8 @@ interface IPokerRoom {
   players: IPlayer[];
 }
 
-function useUniqueGames(games: any[]) {
+function useUniqueGames(games: any[] | undefined | null) {
+  if (!Array.isArray(games)) return [];
   return Array.from(new Map(games.map((g) => [g.gameId, g])).values());
 }
 
