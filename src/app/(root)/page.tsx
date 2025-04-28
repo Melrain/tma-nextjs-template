@@ -1,79 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
 import { useLobbyData } from "@/hooks/useLobbyData";
-import { useLobbySocket } from "@/hooks/useLobbySocket";
-import { Button } from "@/components/ui/button";
-import { Input } from "@telegram-apps/telegram-ui";
 import { GameCard } from "@/components/Game/GameCard";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { IPlayer } from "@/types/GameTypes";
+import { useState } from "react";
 
-const LobbyPage = () => {
+export default function LobbyPage() {
   const { user, games, createGame, joinGame } = useLobbyData();
-  const { isConnected } = useLobbySocket();
-  const [buyInAmount, setBuyInAmount] = useState(100);
   const router = useRouter();
+  const [buyInAmount, setBuyInAmount] = useState(100);
 
-  if (!isConnected) {
+  if (!user) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-gray-500">连接服务器中...</div>
+      <div className="flex min-h-screen w-full items-center justify-center bg-gray-900">
+        <div className="text-gray-400">加载中...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center space-y-6 bg-gray-100 px-4 py-8">
-      <Button
-        onClick={createGame}
-        className="absolute right-6 top-6 bg-gradient-to-r from-pink-500 to-yellow-500 text-white"
-      >
-        创建一个新游戏
-      </Button>
-      <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-bold text-gray-800">
-          欢迎, {user?.username}
-        </h1>
-        <p className="text-gray-600">余额：{user?.balance}</p>
-      </div>
-      {games.length === 0 ? (
-        <div className="mt-10 text-gray-400">
-          暂无游戏房间，快来创建一个吧！
+    <div className="flex min-h-screen w-full flex-col space-y-6 bg-gradient-to-b from-gray-900 via-gray-800 to-black p-6 py-10">
+      {/* 顶部栏 */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-gold-400 text-2xl font-bold">
+            欢迎, {user.username}
+          </h1>
+          <p className="text-sm text-gray-400">余额: {user.balance} 💰</p>
         </div>
-      ) : (
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-4 md:grid-cols-2">
-          {games.map((game) => {
+        <Button
+          onClick={createGame}
+          className="bg-green-700 text-white hover:bg-green-600"
+        >
+          创建新游戏
+        </Button>
+      </div>
+
+      {/* 房间列表 */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {games.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500">
+            暂无可加入的游戏
+          </div>
+        ) : (
+          games.map((game) => {
             const isJoined = game.players.some(
-              (p: IPlayer) => p.playerId === user?.userId,
+              (p: any) => p.playerId === user.userId,
             );
+
+            const handleJoin = async () => {
+              await joinGame(game.gameId, buyInAmount);
+              router.push(`/game/${game.gameId}`);
+            };
+
+            const handleRejoin = () => {
+              router.push(`/game/${game.gameId}`);
+            };
 
             return (
               <GameCard
                 key={game.gameId}
-                gameName={game.gameName}
                 gameId={game.gameId}
-                players={game.players}
+                gameName={game.gameName}
+                bigBlind={game.bigBlind}
+                minBuyIn={game.bigBlind * 20}
                 maxPlayers={game.maxPlayers}
+                players={game.players || []}
                 isJoined={isJoined}
-                onJoin={() => joinGame(game.gameId, buyInAmount)}
-                onRejoin={() => router.push(`/game/${game.gameId}`)}
+                onJoin={handleJoin}
+                onRejoin={handleRejoin}
               />
             );
-          })}
-        </div>
-      )}
-      {/* 买入金额输入框
-      <div className="fixed bottom-6 left-6">
-        <Input
-          type="number"
-          value={buyInAmount}
-          onChange={(e) => setBuyInAmount(Number(e.target.value))}
-          placeholder="买入金额"
-        />
-      </div> */}
+          })
+        )}
+      </div>
     </div>
   );
-};
-
-export default LobbyPage;
+}

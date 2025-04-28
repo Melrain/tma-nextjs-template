@@ -29,9 +29,7 @@ const layout = ({
       username={params.username}
       tonWalletAddress={tonWalletAddress}
     >
-      <main className="flex h-screen flex-col items-center justify-center space-y-6">
-        {children}
-      </main>
+      <main className="">{children}</main>
     </SocketProvider>
   );
 };
