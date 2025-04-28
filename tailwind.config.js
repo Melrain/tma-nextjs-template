@@ -11,6 +11,7 @@ module.exports = {
   ],
   theme: {
     extend: {
+      backfaceVisibility: ["responsive"],
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -73,5 +74,14 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        ".backface-hidden": { backfaceVisibility: "hidden" },
+        ".backface-visible": { backfaceVisibility: "visible" },
+      };
+      addUtilities(newUtilities, ["responsive"]);
+    },
+  ],
 };

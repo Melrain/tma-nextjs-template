@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useSocket } from "./SocketContext";
 import {
-  PlayerAction,
   ActionType,
   CODE,
   GamePhase,
+  PlayerAction,
   PlayerStatus,
 } from "@/types/GameTypes";
 import {
@@ -18,6 +18,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
+import { useRaiseSlider } from "@/hooks/useRaiseSlider";
 
 interface ActionPanelProps {
   gameId: string;
@@ -41,18 +42,33 @@ const ActionPanel = ({
   const socket = useSocket();
 
   const [isActed, setIsActed] = useState(false);
-  const [raiseAmount, setRaiseAmount] = useState(0);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const onAction = (action: ActionType, amount: number = 0) => {
+  const {
+    raiseAmount,
+    setRaiseAmount,
+    minAmount,
+    maxAmount,
+    raiseAction,
+    betAction,
+  } = useRaiseSlider(availableActions);
+
+  const onAction = (actionType: ActionType, amount: number = 0) => {
     socket.emit(CODE.PLAYER_ACTION, {
       gameId,
-      action: { type: action, amount },
+      action: { type: actionType, amount },
       playerId: userId,
     });
     setIsActed(true);
     setPopoverOpen(false);
   };
+
+  useEffect(() => {
+    if (popoverOpen) {
+      const defaultVal = raiseAction?.amount ?? betAction?.amount ?? minAmount;
+      setRaiseAmount((prev) => (prev < minAmount ? defaultVal : prev));
+    }
+  }, [popoverOpen, raiseAction, betAction, minAmount]);
 
   useEffect(() => {
     const handleTimer = (data: { playerId: string; seconds: number }) => {
@@ -83,51 +99,41 @@ const ActionPanel = ({
       ) : (
         <div className="flex flex-row justify-center gap-2">
           {availableActions.map((action) => {
-            const { type, amount = 0, minAmount = 0, maxAmount = 0 } = action;
-
-            const isRaiseType =
-              type === ActionType.Raise || type === ActionType.Bet;
-            const isAllInFallback = type === ActionType.AllIn;
-
-            const isRedundantAllIn =
-              isAllInFallback &&
-              availableActions.some(
-                (a) =>
-                  (a.type === ActionType.Raise || a.type === ActionType.Bet) &&
-                  a.maxAmount === playerTotalChips,
-              );
-
-            if (isRedundantAllIn) return null;
-
-            if (isRaiseType) {
+            if (
+              action.type === ActionType.Raise ||
+              action.type === ActionType.Bet
+            ) {
               return (
                 <Popover
-                  key={`${type}-${minAmount}-${maxAmount}`}
+                  key={action.type}
                   open={popoverOpen}
                   onOpenChange={setPopoverOpen}
                 >
                   <PopoverTrigger asChild>
                     <button
+                      className="flex h-[40px] w-[100px] items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 text-sm font-semibold text-white"
                       onClick={() => setPopoverOpen(true)}
-                      className="flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out"
                     >
-                      {type === ActionType.Raise ? "⬆️ Raise" : "💰 Bet"}
+                      {action.type === ActionType.Raise ? "⬆️ Raise" : "💰 Bet"}
                     </button>
                   </PopoverTrigger>
 
-                  <PopoverContent className="z-50 flex w-[90vw] max-w-xs flex-col items-center space-y-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md">
+                  <PopoverContent
+                    side="top"
+                    align="center"
+                    className="w-[90vw] max-w-xs rounded-2xl bg-white/10 p-4 shadow-xl backdrop-blur-md"
+                  >
                     <Slider
                       min={minAmount}
                       max={maxAmount}
                       value={[raiseAmount]}
-                      step={1}
                       onValueChange={(val) => setRaiseAmount(val[0])}
                     />
                     <div className="text-sm text-white">
-                      {ActionType[type]}: <strong>{raiseAmount}</strong> (Min:{" "}
-                      {minAmount}, Max: {maxAmount})
+                      {action.type === ActionType.Raise ? "Raise" : "Bet"}:{" "}
+                      <strong>{raiseAmount}</strong>
                     </div>
-                    <div className="flex w-full justify-between gap-4">
+                    <div className="mt-4 flex w-full justify-between gap-4">
                       <Button
                         variant="secondary"
                         className="flex-1"
@@ -139,16 +145,9 @@ const ActionPanel = ({
                         disabled={
                           raiseAmount < minAmount || raiseAmount > maxAmount
                         }
-                        className="flex-1 text-white"
-                        onClick={() => {
-                          const isAllIn = raiseAmount === maxAmount;
-                          onAction(
-                            isAllIn ? ActionType.AllIn : type,
-                            raiseAmount,
-                          );
-                        }}
+                        onClick={() => onAction(action.type, raiseAmount)}
                       >
-                        {raiseAmount === maxAmount ? "ALL-IN" : "Confirm"}
+                        Confirm
                       </Button>
                     </div>
                   </PopoverContent>
@@ -156,27 +155,28 @@ const ActionPanel = ({
               );
             }
 
-            const labelMap: Partial<Record<ActionType, string>> = {
-              [ActionType.Fold]: "Fold",
-              [ActionType.Check]: "Check",
-              [ActionType.Call]: `Call ${amount}`,
-              [ActionType.CallAllIn]: `ALL-IN (Call) ${amount}`,
-              [ActionType.RaiseAllIn]: `ALL-IN (Raise) ${amount}`,
-              [ActionType.AllIn]: `ALL-IN ${amount}`,
+            const labelMap: Record<ActionType, string> = {
+              [ActionType.Fold]: "🃏 FOLD",
+              [ActionType.Check]: "✅ CHECK",
+              [ActionType.Call]: `📞 CALL ${action.amount}`,
+              [ActionType.AllIn]: `💥 ALL-IN ${action.amount}`,
+              [ActionType.CallAllIn]: `📞 CALL ALL-IN ${action.amount}`,
+              [ActionType.RaiseAllIn]: `⬆️ RAISE ALL-IN ${action.amount}`,
+              [ActionType.Bet]: "", // Bet单独处理
+              [ActionType.Raise]: "", // Raise单独处理
             };
-
-            const pulse =
-              type === ActionType.AllIn ||
-              type === ActionType.CallAllIn ||
-              type === ActionType.RaiseAllIn;
 
             return (
               <ActionButton
-                key={`${type}-${amount}`}
-                label={labelMap[type] || ActionType[type]}
-                actionType={type}
-                pulse={pulse}
-                onClick={() => onAction(type, amount)}
+                key={action.type}
+                label={labelMap[action.type] || ""}
+                actionType={action.type}
+                onClick={() => onAction(action.type, action.amount || 0)}
+                pulse={
+                  action.type === ActionType.AllIn ||
+                  action.type === ActionType.CallAllIn ||
+                  action.type === ActionType.RaiseAllIn
+                }
               />
             );
           })}
@@ -199,27 +199,14 @@ const ActionButton = ({
   actionType: ActionType;
   pulse?: boolean;
 }) => {
-  const iconMap: Partial<Record<ActionType, string>> = {
-    [ActionType.Fold]: "🃏",
-    [ActionType.Check]: "✅",
-    [ActionType.Bet]: "💰",
-    [ActionType.Call]: "📞",
-    [ActionType.CallAllIn]: "📞💥",
-    [ActionType.Raise]: "⬆️",
-    [ActionType.RaiseAllIn]: "⬆️💥",
-    [ActionType.AllIn]: "💥",
-  };
-
-  const handleClick = () => {
-    if (navigator.vibrate) navigator.vibrate(80);
-    onClick();
-  };
-
   return (
     <button
-      onClick={handleClick}
+      onClick={() => {
+        if (navigator.vibrate) navigator.vibrate(80);
+        onClick();
+      }}
       className={cn(
-        "flex h-[40px] w-[100px] flex-row items-center justify-center rounded-xl px-1 text-center text-sm font-semibold text-white transition-all duration-200 ease-in-out",
+        "flex h-[40px] w-[100px] items-center justify-center rounded-xl px-1 text-center text-sm font-semibold text-white",
         "border-2 border-black shadow-sm backdrop-blur-xl",
         "hover:scale-105 hover:opacity-90",
         pulse
@@ -227,7 +214,6 @@ const ActionButton = ({
           : "bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600",
       )}
     >
-      <span className="mr-1">{iconMap[actionType]}</span>
       {label}
     </button>
   );

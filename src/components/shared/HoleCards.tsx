@@ -3,12 +3,11 @@
 import React, { useEffect, useState } from "react";
 import PokerCard from "./PokerCard";
 import { useTonAddress } from "@tonconnect/ui-react";
-import { Action } from "@/types/ActionStatus";
-import { CardType } from "@/types/CardType";
+import { Card } from "@/types/GameTypes";
 
 interface Props {
   tonWalletAddress: string;
-  holeCards: CardType[];
+  holeCards: Card[];
   actionStatus: string;
   showDown: boolean | null;
   faceDown: boolean;

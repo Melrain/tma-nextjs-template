@@ -35,12 +35,7 @@ const PublicCards = ({ publicCards, gamePhase }: PublicCardsProps) => {
   return (
     <div className="flex gap-2">
       {cards.map((card, index) => (
-        <PokerCard
-          key={index}
-          suit={card.suit}
-          rank={card.rank}
-          gamePhase={gamePhase}
-        />
+        <PokerCard key={index} suit={card.suit} rank={card.rank} />
       ))}
     </div>
   );

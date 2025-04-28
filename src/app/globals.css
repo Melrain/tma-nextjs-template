@@ -80,6 +80,18 @@ input[type="range"].slider-vertical {
   height: 20px;
 }
 
+.perspective-800 {
+  perspective: 800px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
 @keyframes breathe {
   0% {
     transform: scale(1);

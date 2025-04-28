@@ -22,6 +22,7 @@ export const useGameSocket = (gameId: string) => {
   const [gameData, setGameData] = useState<IGame>();
   const [players, setPlayers] = useState<any[]>([]);
   const [availableActions, setAvailableActions] = useState<PlayerAction[]>([]);
+  const [currentMinBet, setCurrentMinBet] = useState(0);
   const [currentMaxBet, setCurrentMaxBet] = useState(0);
   const [currentHighestChips, setCurrentHighestChips] = useState(0);
   const router = useRouter();
@@ -116,6 +117,7 @@ export const useGameSocket = (gameId: string) => {
         eventAvailable,
       );
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, socket, userId]); // ✅ 不包含 players 或动态函数
 
   return {

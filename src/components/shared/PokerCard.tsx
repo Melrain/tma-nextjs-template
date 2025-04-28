@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   RiPokerClubsFill,
   RiPokerDiamondsFill,
@@ -8,8 +8,6 @@ import {
 } from "react-icons/ri";
 import { FaHeart } from "react-icons/fa";
 import { GiPokerHand } from "react-icons/gi";
-import { GamePhase } from "@/types/GameTypes";
-import "@fontsource/playfair-display/400.css"; // Import Playfair Display font
 
 type PokerCardProps = {
   suit: string;
@@ -17,8 +15,6 @@ type PokerCardProps = {
   width?: string;
   height?: string;
   classNames?: string;
-  gamePhase: GamePhase;
-  textSize?: string;
 };
 
 const PokerCard: React.FC<PokerCardProps> = ({
@@ -27,8 +23,6 @@ const PokerCard: React.FC<PokerCardProps> = ({
   width = "w-[60px]",
   height = "h-[84px]",
   classNames = "",
-  gamePhase,
-  textSize = "md",
 }) => {
   const s = suit?.toLowerCase();
   const r = rank?.toLowerCase();
@@ -36,6 +30,16 @@ const PokerCard: React.FC<PokerCardProps> = ({
   const isEmpty = !suit || !rank || s === "empty" || r === "empty";
   const isFaceDown =
     s === "unavailable" || r === "unavailable" || s === "null" || r === "null";
+
+  const [flipped, setFlipped] = useState(false);
+
+  useEffect(() => {
+    if (isFaceDown) {
+      setFlipped(false);
+    } else {
+      setTimeout(() => setFlipped(true), 150); // 延迟一点自然翻牌
+    }
+  }, [suit, rank, isFaceDown]);
 
   if (isEmpty) return null;
 
@@ -61,32 +65,49 @@ const PokerCard: React.FC<PokerCardProps> = ({
 
   return (
     <div
-      className={`relative ${width} ${height} ${classNames} flex items-center justify-center rounded-lg border border-gray-500 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-400 shadow-md`}
-      style={{
-        aspectRatio: "2.5 / 3.5",
-      }}
+      className={`relative ${width} ${height} ${classNames} perspective-800`}
+      style={{ aspectRatio: "2.5 / 3.5" }}
     >
-      {isFaceDown ? (
-        <div className="flex h-full w-full items-center justify-center rounded-lg bg-gray-800 text-4xl text-white">
+      <div
+        className={`relative h-full w-full transition-transform duration-700 ease-in-out ${
+          flipped ? "rotate-y-180 scale-105" : "scale-95"
+        }`}
+        style={{
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {/* 背面 */}
+        <div
+          className="absolute flex h-full w-full items-center justify-center rounded-lg bg-gray-800 text-4xl text-white backface-hidden"
+          style={{
+            transform: "rotateY(0deg)",
+          }}
+        >
           <GiPokerHand />
         </div>
-      ) : (
-        <div className="flex h-full w-full flex-col justify-between px-2 py-2">
-          {/* 左上角：大号数字 + 小号花色 */}
+
+        {/* 正面 */}
+        {!isFaceDown && (
           <div
-            className={`absolute ${colorClass} top-0 text-3xl font-extrabold`}
+            className="absolute flex h-full w-full flex-col justify-between rounded-lg border border-gray-500 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-400 px-2 py-2 shadow-md backface-hidden"
+            style={{
+              transform: "rotateY(180deg)",
+            }}
           >
-            {rank}
+            <div
+              className={`absolute ${colorClass} left-1 top-0 text-3xl font-extrabold`}
+            >
+              {rank}
+            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+              {renderSuitIcon("text-md")}
+            </div>
+            <div className="absolute bottom-0 right-1">
+              {renderSuitIcon("text-3xl")}
+            </div>
           </div>
-          <div className="absolute top-1/2 -translate-y-[30%]">
-            {renderSuitIcon("text-md")}
-          </div>
-          {/* 中间大花色图标 */}
-          <div className="absolute bottom-0 right-1">
-            {renderSuitIcon("text-3xl")}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

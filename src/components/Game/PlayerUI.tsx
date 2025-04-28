@@ -2,9 +2,25 @@
 
 import React from "react";
 import Image from "next/image";
+import {
+  FaHandPaper,
+  FaHandRock,
+  FaHandPeace,
+  FaArrowUp,
+  FaCoins,
+  FaBolt,
+  FaHandHoldingUsd,
+  FaHandHoldingHeart,
+} from "react-icons/fa";
 
 import PokerCard from "../shared/PokerCard";
-import { Card, GamePhase, PlayerAction, PlayerStatus } from "@/types/GameTypes";
+import {
+  ActionType,
+  Card,
+  GamePhase,
+  PlayerAction,
+  PlayerStatus,
+} from "@/types/GameTypes";
 import { CircularCountdown } from "../Game/CountDownUI";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 
@@ -86,7 +102,6 @@ const PlayerUI = ({
             handCards.map((card, cardIndex) => (
               <div key={cardIndex}>
                 <PokerCard
-                  gamePhase={gamePhase}
                   suit={card.suit.toUpperCase()}
                   rank={card.rank.toUpperCase()}
                   width={`${index === 0 ? "w-[3.5rem]" : "w-[2.8rem]"}`}
@@ -122,8 +137,7 @@ const PlayerUI = ({
         <div
           className={`${actionLabelPosition[index]} flex flex-col items-center justify-center text-xs`}
         >
-          <span>{actionLabel(currentAction.type)}</span>
-          <span>{currentAction.amount > 0 && currentAction.amount}</span>
+          <span>{actionLabelIcon(currentAction.type)}</span>
         </div>
       )}
 
@@ -168,21 +182,27 @@ const betLabelPosition = [
   "absolute top-5 -left-5",
 ];
 
-const actionLabel = (actionIndex: number) => {
-  switch (actionIndex) {
-    case 0:
-      return "Call";
-    case 1:
-      return "Raise";
-    case 2:
-      return "Check";
-    case 3:
-      return "Fold";
-    case 4:
-      return "All In";
-    case 5:
-      return "null";
+const actionLabelIcon = (actionType: number) => {
+  switch (actionType) {
+    case ActionType.Fold:
+      return <FaHandPaper className="text-gray-500" title="Fold" />;
+    case ActionType.Check:
+      return <FaHandPeace className="text-green-500" title="Check" />;
+    case ActionType.Call:
+      return <FaHandHoldingUsd className="text-blue-500" title="Call" />;
+    case ActionType.Raise:
+      return <FaArrowUp className="text-yellow-500" title="Raise" />;
+    case ActionType.Bet:
+      return <FaCoins className="text-purple-500" title="Bet" />;
+    case ActionType.AllIn:
+      return <FaBolt className="text-red-500" title="All-In" />;
+    case ActionType.CallAllIn:
+      return <FaHandHoldingUsd className="text-red-400" title="Call All-In" />;
+    case ActionType.RaiseAllIn:
+      return (
+        <FaHandHoldingHeart className="text-red-400" title="Raise All-In" />
+      );
     default:
-      return "";
+      return null;
   }
 };
