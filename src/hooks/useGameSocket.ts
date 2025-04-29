@@ -28,6 +28,7 @@ export const useGameSocket = (gameId: string) => {
   const [currentHighestChips, setCurrentHighestChips] = useState(0);
   const [settlementResult, setSettlementResult] =
     useState<GameResultType | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const router = useRouter();
 
@@ -96,10 +97,6 @@ export const useGameSocket = (gameId: string) => {
     }
   };
 
-  const handleShowDownResult = (data: GameResultType) => {
-    setSettlementResult(data);
-  };
-
   useEffect(() => {
     setIsConnected(socket.connected);
     const eventAvailable = CODE.AVAILABLE_ACTIONS + gameId + userId;
@@ -111,7 +108,6 @@ export const useGameSocket = (gameId: string) => {
     socket.on(eventTouch, handleTouch);
     socket.on(eventPrivate, handlePrivateData);
     socket.on(eventAvailable, handleAvailableActions);
-    socket.on(CODE.SHOW_DOWN_RESULT, handleShowDownResult);
 
     socket.emit(CODE.REDIS_HASH_GET_GAME, { gameId, userId });
 
@@ -125,6 +121,7 @@ export const useGameSocket = (gameId: string) => {
         "🛑 stopped listening available actions event:",
         eventAvailable,
       );
+      socket.off(CODE.SHOW_DOWN_RESULT + gameId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameId, socket, userId]); // ✅ 不包含 players 或动态函数
@@ -139,6 +136,5 @@ export const useGameSocket = (gameId: string) => {
     availableActions,
     currentMaxBet,
     currentHighestChips,
-    settlementResult,
   };
 };

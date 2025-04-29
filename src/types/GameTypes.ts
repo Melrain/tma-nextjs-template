@@ -120,16 +120,12 @@ export enum CODE {
   SHOW_DOWN_RESULT = "SHOW_DOWN_RESULT",
 }
 
-export interface GameResultType {
+export type GameResultType = {
   winners: {
-    playerId: string;
-    wonAmount: number;
-    currentChips: number;
-  }[];
-  players: {
     playerId: string;
     username: string;
     avatar: string;
+    wonAmount: number;
     currentChips: number;
   }[];
-}
+};

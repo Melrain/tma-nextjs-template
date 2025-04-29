@@ -37,8 +37,6 @@ const Page = () => {
     onResetGame,
     currentMaxBet,
     currentHighestChips,
-    settlementResult,
-    setSettlementResult,
   } = useGameSocket(gameId);
 
   if (!isConnected) {
@@ -140,9 +138,8 @@ const Page = () => {
       </div>
 
       {/* Result Modal */}
-      <div className="top1/2 lef-1/2 absolute">
-        <SettlementModal />
-      </div>
+
+      <SettlementModal gameId={gameId} />
     </div>
   );
 };
