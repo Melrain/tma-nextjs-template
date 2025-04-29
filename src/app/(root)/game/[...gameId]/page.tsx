@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import { useGameParams } from "@/hooks/useGameParams";
 import { useGameSocket } from "@/hooks/useGameSocket";
@@ -8,6 +8,9 @@ import PlayerUI from "@/components/Game/PlayerUI";
 import { GamePhase, IPlayer } from "@/types/GameTypes";
 import ActionPanel from "@/components/Game/ActionPanel";
 import PublicCards from "@/components/Game/PublicCards";
+import { useFlyingChips } from "@/hooks/useFlyingChips";
+import FlyingChip from "@/components/Game/FlyingChip";
+import SettlementModal from "@/components/Game/SettlementModal";
 
 const positions = [
   "bottom-4 left-4 transform -translate-y-3/4 ",
@@ -21,6 +24,9 @@ const positions = [
 const Page = () => {
   const params = useGameParams();
   const gameId = params[0];
+  const { chips, launchChips } = useFlyingChips();
+  const playerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const potRef = useRef<HTMLDivElement>(null);
   const {
     isConnected,
     players,
@@ -31,6 +37,8 @@ const Page = () => {
     onResetGame,
     currentMaxBet,
     currentHighestChips,
+    settlementResult,
+    setSettlementResult,
   } = useGameSocket(gameId);
 
   if (!isConnected) {
@@ -70,6 +78,9 @@ const Page = () => {
             <div
               key={position}
               className="flex w-full items-center justify-center"
+              ref={(el) => {
+                playerRefs.current[index] = el;
+              }}
             >
               <PlayerUI
                 gameId={gameId}
@@ -124,8 +135,13 @@ const Page = () => {
           )}
         </div>
         <div className="space-y-1 text-center text-sm text-white">
-          <div>💰 Pot: {gameData?.mainPot.amount}</div>
+          <div ref={potRef}>💰 Pot: {gameData?.mainPot.amount}</div>
         </div>
+      </div>
+
+      {/* Result Modal */}
+      <div className="top1/2 lef-1/2 absolute">
+        <SettlementModal />
       </div>
     </div>
   );

@@ -117,4 +117,19 @@ export enum CODE {
   PLAYER_ACTION = "PLAYER_ACTION",
   PLAYER_PRE_ACTION = "PLAYER_PRE_ACTION",
   AVAILABLE_ACTIONS = "AVAILABLE_ACTIONS",
+  SHOW_DOWN_RESULT = "SHOW_DOWN_RESULT",
+}
+
+export interface GameResultType {
+  winners: {
+    playerId: string;
+    wonAmount: number;
+    currentChips: number;
+  }[];
+  players: {
+    playerId: string;
+    username: string;
+    avatar: string;
+    currentChips: number;
+  }[];
 }

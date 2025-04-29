@@ -8,6 +8,7 @@ import {
   ActionType,
   IPlayer,
   PlayerAction,
+  GameResultType,
 } from "@/types/GameTypes";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { reorderPlayerList } from "@/utils/fn";
@@ -25,6 +26,9 @@ export const useGameSocket = (gameId: string) => {
   const [currentMinBet, setCurrentMinBet] = useState(0);
   const [currentMaxBet, setCurrentMaxBet] = useState(0);
   const [currentHighestChips, setCurrentHighestChips] = useState(0);
+  const [settlementResult, setSettlementResult] =
+    useState<GameResultType | null>(null);
+
   const router = useRouter();
 
   const onLeaveGame = async () => {
@@ -92,6 +96,10 @@ export const useGameSocket = (gameId: string) => {
     }
   };
 
+  const handleShowDownResult = (data: GameResultType) => {
+    setSettlementResult(data);
+  };
+
   useEffect(() => {
     setIsConnected(socket.connected);
     const eventAvailable = CODE.AVAILABLE_ACTIONS + gameId + userId;
@@ -103,6 +111,7 @@ export const useGameSocket = (gameId: string) => {
     socket.on(eventTouch, handleTouch);
     socket.on(eventPrivate, handlePrivateData);
     socket.on(eventAvailable, handleAvailableActions);
+    socket.on(CODE.SHOW_DOWN_RESULT, handleShowDownResult);
 
     socket.emit(CODE.REDIS_HASH_GET_GAME, { gameId, userId });
 
@@ -130,5 +139,6 @@ export const useGameSocket = (gameId: string) => {
     availableActions,
     currentMaxBet,
     currentHighestChips,
+    settlementResult,
   };
 };
