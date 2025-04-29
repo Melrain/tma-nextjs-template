@@ -15,7 +15,7 @@ const layout = ({
   const _initData = parseInitData(initData.raw());
   const tonWalletAddress = useTonAddress();
   const params = {
-    url: "http://3.80.125.152:8080/",
+    url: "ws://3.80.125.152:8080",
     userId: _initData.user?.id || "0",
     username: _initData.user?.firstName || "user",
     initDataRaw: initData.raw(),
