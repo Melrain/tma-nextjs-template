@@ -20,7 +20,7 @@ export default function LobbyPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col space-y-6 bg-gradient-to-b from-emerald-950 via-gray-900 to-black p-6 py-10">
+    <div className="flex min-h-screen w-full flex-col space-y-6 bg-gradient-to-b from-gray-950 via-purple-950 to-black p-6 py-10">
       {/* 顶部栏 */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
@@ -31,9 +31,9 @@ export default function LobbyPage() {
         </div>
         <Button
           onClick={createGame}
-          className="bg-green-700 text-white hover:bg-green-600"
+          className="rounded-xl bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 px-6 py-2 font-bold text-white shadow-lg transition-transform hover:scale-105"
         >
-          创建新游戏
+          ✨ 创建新游戏
         </Button>
       </div>
 
@@ -70,6 +70,7 @@ export default function LobbyPage() {
                 isJoined={isJoined}
                 onJoin={handleJoin}
                 onRejoin={handleRejoin}
+                maxBuyIn={game.bigBlind * 100}
               />
             );
           })

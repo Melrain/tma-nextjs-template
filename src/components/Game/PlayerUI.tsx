@@ -23,6 +23,7 @@ import {
 } from "@/types/GameTypes";
 import { CircularCountdown } from "../Game/CountDownUI";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
+import { GiStack } from "react-icons/gi";
 
 interface PlayerUIProps {
   username: string;
@@ -70,6 +71,7 @@ const PlayerUI = ({
       key={index}
       className={`absolute ${positionCss} flex size-20 items-center justify-center rounded-full border-2 border-gray-800 bg-white shadow-md`}
     >
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-400/20 via-purple-400/20 to-transparent blur-md" />
       <Image
         className="absolute -z-50 size-full rounded-full"
         width={50}
@@ -77,7 +79,6 @@ const PlayerUI = ({
         src={avatar}
         alt={"avatar"}
       />
-
       {/* 倒计时圈 - 仅当前行动玩家显示 */}
       {playerId === currentPlayerId && (
         <div className="absolute -left-2 -top-2 z-10">
@@ -89,7 +90,6 @@ const PlayerUI = ({
           />
         </div>
       )}
-
       <div
         className={`absolute ${
           index === 0 ? "-right-24 bottom-2" : "bottom-0"
@@ -116,7 +116,6 @@ const PlayerUI = ({
             ))}
         </div>
       </div>
-
       {/* dealer 标记 */}
       {isDealer && (
         <div
@@ -125,11 +124,13 @@ const PlayerUI = ({
           <span className="text-white">D</span>
         </div>
       )}
-
       {/* 当前下注额 */}
       {playerCurrentBet > 0 && (
         <div className={`${betLabelPosition[index]} z-50`}>
-          {playerCurrentBet}
+          <div className="flex flex-row items-center gap-1 text-xs text-yellow-300">
+            <GiStack />
+            <span>{playerCurrentBet}</span>
+          </div>
         </div>
       )}
       {/* 动作标签 */}
@@ -140,14 +141,12 @@ const PlayerUI = ({
           <span>{actionLabelIcon(currentAction.type)}</span>
         </div>
       )}
-
       {/* 名字和筹码 */}
       <div className="absolute -bottom-2 flex w-full flex-col items-center justify-center rounded-lg bg-black text-center shadow-white">
         <span className="w-full rounded-full border-[1px] border-white text-xs">
           {username}
         </span>
         <span className="text-xs">{totalChips / bigBlind} BB</span>
-        <span>{playerStatus}</span>
       </div>
     </div>
   );
@@ -156,9 +155,9 @@ const PlayerUI = ({
 export default PlayerUI;
 
 const actionLabelPosition = [
-  "absolute top-5 -right-5",
-  "absolute top-5 -right-5",
-  "absolute top-5 -right-5",
+  "absolute top-0 -right-5",
+  "absolute -top-0 -right-5",
+  "absolute top-0 -right-5",
   "absolute -bottom-5",
   "absolute top-5 -left-5",
   "absolute top-5 -left-5",
@@ -174,7 +173,7 @@ const dealerMarkPosition = [
 ];
 
 const betLabelPosition = [
-  "absolute -top-5 -right-5",
+  "absolute -top-5 -right-2",
   "absolute top-5 -right-5",
   "absolute top-5 -right-5",
   "absolute -bottom-5",

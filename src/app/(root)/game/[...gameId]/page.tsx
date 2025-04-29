@@ -38,8 +38,10 @@ const Page = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-[radial-gradient(ellipse_at_center,_#14532d_0%,_#052e16_100%)] from-green-950 via-emerald-900 to-green-800 text-white">
+    <div className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(255,215,0,0.15)_0%,_transparent_70%)]" />
       {/* 用户信息 & 返回按钮 */}
+
       <button
         onClick={() => {
           onLeaveGame();
@@ -122,13 +124,7 @@ const Page = () => {
           )}
         </div>
         <div className="space-y-1 text-center text-sm text-white">
-          <div className="text-lg font-bold tracking-wide">🃏 Poker Table</div>
-          <div>bigBlind:{gameData?.bigBlind}</div>
           <div>💰 Pot: {gameData?.mainPot.amount}</div>
-          <div>📌 Min Bet: {gameData?.currentMinBet}</div>
-          <div>🎯 Current Player: {gameData?.currentPlayerId}</div>
-          <div>📶 Phase: {gamePhaseText(gameData?.gamePhase)}</div>
-          <div>当前最高筹码:{currentHighestChips}</div>
         </div>
       </div>
     </div>

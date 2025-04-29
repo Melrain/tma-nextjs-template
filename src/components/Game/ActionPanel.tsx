@@ -145,7 +145,9 @@ const ActionPanel = ({
                         disabled={
                           raiseAmount < minAmount || raiseAmount > maxAmount
                         }
+                        variant="destructive"
                         onClick={() => onAction(action.type, raiseAmount)}
+                        className="flex-1 text-white"
                       >
                         Confirm
                       </Button>

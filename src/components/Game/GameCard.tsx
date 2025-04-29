@@ -12,6 +12,7 @@ interface GameCardProps {
   gameId: string;
   bigBlind: number;
   minBuyIn: number;
+  maxBuyIn: number;
   maxPlayers: number;
   players: { playerId: string; username?: string; avatar?: string }[];
   isJoined: boolean;
@@ -24,6 +25,7 @@ export const GameCard = ({
   gameId,
   bigBlind,
   minBuyIn,
+  maxBuyIn,
   maxPlayers,
   players,
   isJoined,
@@ -50,7 +52,7 @@ export const GameCard = ({
         repeatType: "loop",
         ease: "easeInOut", // 让光芒变化更平滑
       }}
-      className="flex flex-col rounded-2xl bg-gray-800 p-4 transition-transform hover:scale-[1.02]"
+      className="flex flex-col rounded-2xl bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 p-4 shadow-inner transition-transform hover:scale-[1.02]"
     >
       {/* 顶部 */}
       <div className="flex items-center justify-between">
@@ -79,6 +81,7 @@ export const GameCard = ({
         <p>🏷️ 房间 ID: {gameId}</p>
         <p>💰 大盲: {bigBlind}</p>
         <p>🪙 最低买入: {minBuyIn}</p>
+        <p>🪙 最高买入: {maxBuyIn}</p>
       </div>
 
       {/* 底部按钮 */}
