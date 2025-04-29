@@ -9,7 +9,7 @@ export function useGameActions(userData: any) {
 
   const createGame = async () => {
     try {
-      await axios.post("http://localhost:8080/api/game/create", {
+      await axios.post("http://3.80.125.152:8080/api/game/create", {
         userId: userData.user?.id,
         createGameDto: {
           gameId: userData.user?.id,
@@ -34,7 +34,7 @@ export function useGameActions(userData: any) {
 
   const joinGame = async (gameId: string) => {
     try {
-      await axios.post("http://localhost:8080/api/game/join-game", {
+      await axios.post("http://3.80.125.152:8080/api/game/join-game", {
         gameId,
         username: userData.user?.firstName,
         playerId: userData.user?.id,

@@ -17,7 +17,7 @@ const ConnectWallet = () => {
         if (walletAddress) {
           // add user to db
           const response = await axios.post(
-            "http://localhost:8080/api/user/login",
+            "http://3.80.125.152:8080/api/user/login",
             {
               username: _initData.user?.firstName || "user",
               walletAddress: walletAddress,

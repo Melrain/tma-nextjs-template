@@ -16,12 +16,15 @@ export function useUser() {
       if (!id || !firstName) return;
 
       try {
-        const res = await axios.post("http://localhost:8080/api/user/login", {
-          userId: id,
-          username: firstName,
-          walletAddress: tonWalletAddress,
-          avatar: photoUrl,
-        });
+        const res = await axios.post(
+          "http://3.80.125.152:8080/api/user/login",
+          {
+            userId: id,
+            username: firstName,
+            walletAddress: tonWalletAddress,
+            avatar: photoUrl,
+          },
+        );
         if (res.data) setUser(res.data);
       } catch (err) {
         console.error("Error fetching user:", err);

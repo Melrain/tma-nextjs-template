@@ -11,7 +11,7 @@ export function useGameList() {
 
   const fetchGames = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/game/all");
+      const res = await axios.get("http://3.80.125.152:8080/api/game/all");
       if (res.data?.data) {
         setGames(res.data.data);
       }
