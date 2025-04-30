@@ -30,6 +30,8 @@ export const SocketProvider = ({
 
   if (!socketRef.current) {
     socketRef.current = io(url, {
+      transports: ["websocket"], // ✅ 强制 WebSocket
+      withCredentials: true, // ✅ 支持携带 Cookie
       auth: {
         userId,
         username,
