@@ -17,7 +17,7 @@ export function useUser() {
 
       try {
         const res = await axios.post(
-          "http://3.80.125.152:8080/api/user/login",
+          `${process.env.NEXT_PUBLIC_API_BASE}/api/user/login`,
           {
             userId: id,
             username: firstName,

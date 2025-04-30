@@ -9,7 +9,7 @@ export function useGameActions(userData: any) {
 
   const createGame = async () => {
     try {
-      await axios.post("http://3.80.125.152:8080/api/game/create", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/game/create`, {
         userId: userData.user?.id,
         createGameDto: {
           gameId: userData.user?.id,
@@ -34,13 +34,16 @@ export function useGameActions(userData: any) {
 
   const joinGame = async (gameId: string) => {
     try {
-      await axios.post("http://3.80.125.152:8080/api/game/join-game", {
-        gameId,
-        username: userData.user?.firstName,
-        playerId: userData.user?.id,
-        buyInAmount: 100,
-        avatar: userData.user?.photoUrl,
-      });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/game/join-game`,
+        {
+          gameId,
+          username: userData.user?.firstName,
+          playerId: userData.user?.id,
+          buyInAmount: 100,
+          avatar: userData.user?.photoUrl,
+        },
+      );
 
       router.push(`/game/${gameId}`);
     } catch (err) {

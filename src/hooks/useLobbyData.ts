@@ -20,7 +20,9 @@ export function useLobbyData() {
 
   const fetchGames = useCallback(async () => {
     try {
-      const { data } = await axios.get("http://3.80.125.152:8080/api/game/all");
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/game/all`,
+      );
       setGames(data.data);
     } catch (error) {
       console.error("[useLobbyData] Error fetching games:", error);
@@ -30,7 +32,7 @@ export function useLobbyData() {
   const createUser = useCallback(async () => {
     try {
       const { data } = await axios.post(
-        "http://3.80.125.152:8080/api/user/login",
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/user/login`,
         {
           userId: userData.user?.id,
           username: userData.user?.firstName,
@@ -51,7 +53,7 @@ export function useLobbyData() {
 
   const createGame = useCallback(async () => {
     try {
-      await axios.post("http://3.80.125.152:8080/api/game/create", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/game/create`, {
         userId: userData.user?.id,
         createGameDto: {
           gameId: userData.user?.id,
@@ -80,13 +82,16 @@ export function useLobbyData() {
   const joinGame = useCallback(
     async (gameId: string, buyInAmount: number) => {
       try {
-        await axios.post("http://3.80.125.152:8080/api/game/join-game", {
-          gameId,
-          username: userData.user?.firstName,
-          playerId: userData.user?.id,
-          buyInAmount,
-          avatar: userData.user?.photoUrl,
-        });
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_BASE}/api/game/join-game`,
+          {
+            gameId,
+            username: userData.user?.firstName,
+            playerId: userData.user?.id,
+            buyInAmount,
+            avatar: userData.user?.photoUrl,
+          },
+        );
       } catch (error) {
         console.error("[useLobbyData] Error joining game:", error);
       }

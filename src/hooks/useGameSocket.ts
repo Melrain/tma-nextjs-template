@@ -34,10 +34,13 @@ export const useGameSocket = (gameId: string) => {
 
   const onLeaveGame = async () => {
     try {
-      await axios.post("http://3.80.125.152:8080/api/game/leave-game", {
-        gameId,
-        playerId: userId,
-      });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/game/leave-game`,
+        {
+          gameId,
+          playerId: userId,
+        },
+      );
     } catch (error) {
       console.error("Error leaving game:", error);
     } finally {
@@ -47,9 +50,12 @@ export const useGameSocket = (gameId: string) => {
 
   const onResetGame = async () => {
     try {
-      await axios.post("http://3.80.125.152:8080/api/game/reset-game", {
-        gameId,
-      });
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/game/reset-game`,
+        {
+          gameId,
+        },
+      );
     } catch (error) {
       console.error("Error resetting game:", error);
     }

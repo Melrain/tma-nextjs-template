@@ -80,7 +80,7 @@ const CreatePokerRoom = () => {
       };
 
       const response = await axios.post(
-        "http://3.80.125.152:8080/api/poker-room",
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/poker-room`,
         createRoomDto,
       );
       if (response.status !== 201) {
