@@ -21,7 +21,7 @@ export default function GameLayout({
 
   return (
     <div
-      className="fixed inset-0 w-full overflow-hidden bg-black text-white"
+      className="fixed inset-0 w-full overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 text-white"
       style={{ height: "calc(var(--vh, 1vh) * 100)" }}
     >
       {children}

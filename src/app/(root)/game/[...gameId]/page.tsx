@@ -47,10 +47,7 @@ const Page = () => {
   }
 
   return (
-    <div
-      className="fixed inset-0 w-full max-w-[100vw] overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white"
-      style={{ height: "100dvh" }}
-    >
+    <div className="fixed inset-0 w-full max-w-[100vw] overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950">
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(255,215,0,0.15)_0%,_transparent_70%)]" />
       {/* 用户信息 & 返回按钮 */}
 
