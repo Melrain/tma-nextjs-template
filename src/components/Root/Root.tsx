@@ -17,7 +17,11 @@ import { useDidMount } from "@/hooks/useDidMount";
 import { useClientOnce } from "@/hooks/useClientOnce";
 import { setLocale } from "@/core/i18n/locale";
 import { init } from "@/core/init";
-import { viewport } from "@telegram-apps/sdk";
+import {
+  isChangingFullscreen,
+  requestFullscreen,
+  viewport,
+} from "@telegram-apps/sdk";
 
 import "./styles.css";
 import { useRouter } from "next/navigation";
@@ -50,16 +54,12 @@ function RootInner({ children }: PropsWithChildren) {
 
   // 🆕 请求全屏
   useEffect(() => {
-    if (viewport.requestFullscreen?.isAvailable()) {
-      viewport
-        .requestFullscreen()
-        .catch((err) => console.warn("[⚠️ 全屏失败]", err));
-    }
-
-    // 尝试降级方案
-    if (viewport.expand?.isAvailable()) {
-      viewport.expand();
-    }
+    const tryFullScreen = async () => {
+      if (requestFullscreen.isAvailable() && !isChangingFullscreen()) {
+        await requestFullscreen();
+      }
+      tryFullScreen();
+    };
   }, []);
 
   const manifestUrl =
