@@ -29,12 +29,7 @@ const layout = ({
       username={params.username}
       tonWalletAddress={tonWalletAddress}
     >
-      <html lang="zh" className="h-full">
-        <body className="h-full bg-black text-white">
-          {/* ❌ 不包 main，直接渲染 children */}
-          {children}
-        </body>
-      </html>
+      {children}
     </SocketProvider>
   );
 };
