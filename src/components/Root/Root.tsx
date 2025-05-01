@@ -53,13 +53,19 @@ function RootInner({ children }: PropsWithChildren) {
   }, [initDataUser]);
 
   // 🆕 请求全屏
+
   useEffect(() => {
     const tryFullScreen = async () => {
       if (requestFullscreen.isAvailable() && !isChangingFullscreen()) {
-        await requestFullscreen();
+        try {
+          await requestFullscreen();
+        } catch (err) {
+          console.warn("[⚠️ 全屏失败]", err);
+        }
       }
-      tryFullScreen();
     };
+
+    tryFullScreen();
   }, []);
 
   const manifestUrl =
