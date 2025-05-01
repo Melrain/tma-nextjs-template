@@ -9,6 +9,7 @@ body {
   padding: 0;
   height: 100%;
   overflow-x: hidden; /* 防止横向溢出 */
+  overflow-y: auto;
   overscroll-behavior: none; /* 防止触发浏览器“弹性滑动” */
   -webkit-overflow-scrolling: touch; /* iOS更流畅滚动 */
   touch-action: pan-y; /* 禁止横向滑动，只保留竖向滚动（移动端更稳） */

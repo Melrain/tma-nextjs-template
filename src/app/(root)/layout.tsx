@@ -29,7 +29,9 @@ const layout = ({
       username={params.username}
       tonWalletAddress={tonWalletAddress}
     >
-      {children}
+      <main className="min-h-screen w-full overflow-y-auto bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
+        {children}
+      </main>
     </SocketProvider>
   );
 };
