@@ -3,7 +3,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div className="max-w-1/2 flex h-screen w-full items-center justify-center">
+    <div className="max-w-1/2 flex min-h-screen w-full items-center justify-center">
       <CreatePokerRoom />
     </div>
   );

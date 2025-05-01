@@ -55,6 +55,11 @@ function RootInner({ children }: PropsWithChildren) {
         .requestFullscreen()
         .catch((err) => console.warn("[⚠️ 全屏失败]", err));
     }
+
+    // 尝试降级方案
+    if (viewport.expand?.isAvailable()) {
+      viewport.expand();
+    }
   }, []);
 
   const manifestUrl =
@@ -83,7 +88,7 @@ export function Root(props: PropsWithChildren) {
       <RootInner {...props} />
     </ErrorBoundary>
   ) : (
-    <div className="flex h-screen flex-col items-center justify-center space-y-6 text-white">
+    <div className="">
       <div>Loading...</div>
       <Link href={"/"}>home</Link>
     </div>

@@ -14,7 +14,7 @@ const Welcome = () => {
   const router = useRouter();
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center space-y-6">
+    <div className="flex min-h-screen flex-col items-center justify-center space-y-6">
       <h1>Welcome!</h1>
       <div>
         <ConnectWallet />
