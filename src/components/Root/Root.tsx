@@ -114,7 +114,7 @@ export function Root(props: PropsWithChildren) {
       <RootInner {...props} />
     </ErrorBoundary>
   ) : (
-    <div className="flex h-screen flex-col items-center justify-center space-y-6 text-white">
+    <div className="fixed inset-0 flex flex-col bg-black text-white">
       <div>Loading...</div>
       <Link href={"/"}>home</Link>
     </div>

@@ -29,7 +29,7 @@ const layout = ({
       username={params.username}
       tonWalletAddress={tonWalletAddress}
     >
-      <main className="fixed inset-0 w-full max-w-[100vw] overflow-hidden">
+      <main className="min-h-screen w-full max-w-[100vw] overflow-x-hidden">
         {children}
       </main>
     </SocketProvider>
