@@ -6,6 +6,7 @@ import {
   miniApp,
   useLaunchParams,
   useSignal,
+  init as sdkInit,
 } from "@telegram-apps/sdk-react";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import { AppRoot } from "@telegram-apps/telegram-ui";
@@ -57,6 +58,8 @@ function RootInner({ children }: PropsWithChildren) {
   // 尝试自动请求全屏
   useEffect(() => {
     const tryFullScreen = async () => {
+      sdkInit();
+
       if (viewport.mount.isAvailable() && !viewport.isMounting()) {
         await viewport.mount();
         viewport.requestFullscreen;
