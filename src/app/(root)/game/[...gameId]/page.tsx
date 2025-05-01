@@ -41,11 +41,6 @@ const Page = () => {
   } = useGameSocket(gameId);
 
   const selfPlayer = players.find((p) => p.playerId === userData?.user?.id);
-  const shouldShowActionPanel =
-    availableActions.length > 0 &&
-    selfPlayer &&
-    gameData?.currentPlayerId === userData?.user?.id &&
-    selfPlayer.status !== PlayerStatus.AllIn;
 
   if (!isConnected) {
     return <div>Connecting...</div>;
@@ -162,7 +157,7 @@ const Page = () => {
 
       {/* Result Modal */}
 
-      <SettlementModal gameId={gameId} />
+      {/* <SettlementModal gameId={gameId} /> */}
     </div>
   );
 };
