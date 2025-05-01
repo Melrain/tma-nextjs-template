@@ -3,7 +3,7 @@
 import { SocketProvider } from "@/components/Game/SocketContext";
 import { initData, parseInitData } from "@telegram-apps/sdk-react";
 import { useTonAddress } from "@tonconnect/ui-react";
-
+import { viewport } from "@telegram-apps/sdk";
 import { useRouter } from "next/navigation";
 import React from "react";
 
