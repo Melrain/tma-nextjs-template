@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useGameParams } from "@/hooks/useGameParams";
 import { useGameSocket } from "@/hooks/useGameSocket";
 import PlayerUI from "@/components/Game/PlayerUI";
-import { GamePhase, IPlayer } from "@/types/GameTypes";
+import { GamePhase, IPlayer, PlayerStatus } from "@/types/GameTypes";
 import ActionPanel from "@/components/Game/ActionPanel";
 import PublicCards from "@/components/Game/PublicCards";
 import { useFlyingChips } from "@/hooks/useFlyingChips";
 import FlyingChip from "@/components/Game/FlyingChip";
 import SettlementModal from "@/components/Game/SettlementModal";
+import { AnimatePresence, motion } from "framer-motion";
 
 const positions = [
   "bottom-4 left-4 transform -translate-y-3/4 ",
@@ -39,12 +40,19 @@ const Page = () => {
     currentHighestChips,
   } = useGameSocket(gameId);
 
+  const selfPlayer = players.find((p) => p.playerId === userData?.user?.id);
+  const shouldShowActionPanel =
+    availableActions.length > 0 &&
+    selfPlayer &&
+    gameData?.currentPlayerId === userData?.user?.id &&
+    selfPlayer.status !== PlayerStatus.AllIn;
+
   if (!isConnected) {
     return <div>Connecting...</div>;
   }
 
   return (
-    <div className="relative min-h-screen w-full max-w-[100vw] overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
+    <div className="fixed inset-0 w-full max-w-[100vw] overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(255,215,0,0.15)_0%,_transparent_70%)]" />
       {/* 用户信息 & 返回按钮 */}
 
@@ -103,17 +111,28 @@ const Page = () => {
           );
         })}
       </div>
-
-      <div className="absolute bottom-5 left-1/2 flex -translate-x-[50%] items-center justify-center">
-        <ActionPanel
-          gameId={gameId}
-          currentPlayerId={gameData?.currentPlayerId || ""}
-          gamePhase={gameData?.gamePhase || 0}
-          playerStatus={players[0]?.status || 0}
-          availableActions={availableActions}
-          playerTotalChips={players[0]?.totalChips || 0}
-        />
-      </div>
+      {/* ActionPanel */}
+      <AnimatePresence>
+        {selfPlayer && (
+          <motion.div
+            key="action-panel"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-5 flex min-w-full items-center justify-center"
+          >
+            <ActionPanel
+              gameId={gameId}
+              currentPlayerId={gameData?.currentPlayerId || ""}
+              gamePhase={gameData?.gamePhase || 0}
+              playerStatus={selfPlayer.status}
+              playerTotalChips={selfPlayer.totalChips}
+              availableActions={availableActions}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 公共 UI */}
       <div className="absolute left-1/2 top-1/3 flex -translate-x-[50%] translate-y-[0%] flex-col items-center justify-center">
