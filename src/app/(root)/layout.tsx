@@ -29,7 +29,9 @@ const layout = ({
       username={params.username}
       tonWalletAddress={tonWalletAddress}
     >
-      <main className="">{children}</main>
+      <main className="min-h-screen w-full max-w-[100vw] overflow-x-hidden">
+        {children}
+      </main>
     </SocketProvider>
   );
 };

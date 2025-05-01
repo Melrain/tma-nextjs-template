@@ -44,7 +44,7 @@ const Page = () => {
   }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
+    <div className="relative min-h-screen w-full max-w-[100vw] overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-black text-white">
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(255,215,0,0.15)_0%,_transparent_70%)]" />
       {/* 用户信息 & 返回按钮 */}
 
@@ -75,7 +75,7 @@ const Page = () => {
           return (
             <div
               key={position}
-              className="flex w-full items-center justify-center"
+              className="flex w-full max-w-[100vw] items-center justify-center overflow-x-hidden"
               ref={(el) => {
                 playerRefs.current[index] = el;
               }}
@@ -135,6 +135,10 @@ const Page = () => {
         <div className="space-y-1 text-center text-sm text-white">
           <div ref={potRef}>💰 Pot: {gameData?.mainPot.amount}</div>
         </div>
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 z-50 overflow-hidden">
+        {/* 你的 FlyingChip 渲染 */}
       </div>
 
       {/* Result Modal */}
